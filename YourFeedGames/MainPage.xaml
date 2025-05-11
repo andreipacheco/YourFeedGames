@@ -16,104 +16,104 @@
         <!-- Barra superior com título e botões -->
         <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Margin="0,0,0,10">
             <Label Grid.Column="0" 
-               Text="YourFeed Games" 
+               Text="Your Feed Games" 
                FontSize="24" 
                FontAttributes="Bold" 
                VerticalOptions="Center"/>
 
             <Button Grid.Column="1"
-                Text="Atualizar"
+                ImageSource="sync_24dp.png"
                 Clicked="OnRefreshClicked"
-                WidthRequest="100"
+                WidthRequest="60"
                 Margin="0,0,10,0"/>
 
             <Button Grid.Column="2" 
-                Text="Configurações" 
+                ImageSource="settings_24dp.png"
                 Clicked="OnSettingsClicked"
-                WidthRequest="120"/>
+                WidthRequest="60"/>
         </Grid>
 
         <!-- Conteúdo principal -->
         <Grid Grid.Row="1">
             <!-- Container de loading -->
             <StackLayout x:Name="loadingContainer" 
-                    IsVisible="False"
-                    HorizontalOptions="Center"
-                    VerticalOptions="Center"
-                    Spacing="20">
+                        IsVisible="False"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center"
+                        Spacing="20">
                 <ActivityIndicator x:Name="loadingIndicator"
-                             IsRunning="True" 
-                             Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource Secondary}}"
-                             HeightRequest="50"
-                             WidthRequest="50"/>
+                                     IsRunning="True" 
+                                     Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource Secondary}}"
+                                     HeightRequest="50"
+                                     WidthRequest="50"/>    
 
                 <Label x:Name="loadingLabel" 
-                   Text="Carregando feeds de notícias..." 
-                   FontSize="16"
-                   HorizontalOptions="Center"/>
+                       Text="Carregando feeds de notícias..." 
+                       FontSize="16"
+                       HorizontalOptions="Center"/>
 
                 <ProgressBar x:Name="loadingProgress" 
-                         Progress="0"
-                         ProgressColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource Secondary}}"
-                         WidthRequest="300"/>
+                             Progress="0"
+                             ProgressColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource Secondary}}"
+                             WidthRequest="300"/>
 
                 <Button x:Name="cancelLoadingButton" 
-                    Text="Cancelar" 
-                    Clicked="OnCancelLoadingClicked"
-                    IsVisible="False"
-                    HorizontalOptions="Center"/>
+                        Text="Cancelar" 
+                        Clicked="OnCancelLoadingClicked"
+                        IsVisible="False"
+                        HorizontalOptions="Center"/>
             </StackLayout>
 
             <!-- ScrollView com as notícias -->
             <ScrollView x:Name="feedScrollView">
                 <CollectionView ItemsSource="{Binding NewsFeed}" 
-               EmptyView="Nenhuma notícia disponível no momento">
+                                EmptyView="Nenhuma notícia disponível no momento">
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
                             <Frame BorderColor="LightGray" 
-                   CornerRadius="10" 
-                   Margin="0,5,0,10" 
-                   Padding="15">
+                                   CornerRadius="10" 
+                                   Margin="0,5,0,10" 
+                                   Padding="15">    
                                 <Grid RowDefinitions="Auto,Auto,Auto,Auto" 
-                      RowSpacing="8">
+                                      RowSpacing="8">
                                     <!-- Título da notícia -->
                                     <Label Grid.Row="0" 
-                           Text="{Binding Title}" 
-                           FontSize="18" 
-                           FontAttributes="Bold" 
-                           LineBreakMode="WordWrap"/>
+                                           Text="{Binding Title}" 
+                                           FontSize="18" 
+                                           FontAttributes="Bold" 
+                                           LineBreakMode="WordWrap"/>
 
                                     <!-- Descrição da notícia (se disponível) -->
                                     <Label Grid.Row="1" 
-                           Text="{Binding Description}" 
-                           FontSize="14"
-                           IsVisible="{Binding Description, Converter={StaticResource StringNotEmptyConverter}}"
-                           Margin="0,5,0,0"
-                           LineBreakMode="TailTruncation"
-                           MaxLines="3"/>
+                                           Text="{Binding Description}" 
+                                           FontSize="14"
+                                           IsVisible="{Binding Description, Converter={StaticResource StringNotEmptyConverter}}"
+                                           Margin="0,5,0,0"
+                                           LineBreakMode="TailTruncation"
+                                           MaxLines="3"/>   
 
                                     <!-- Fonte da notícia -->
                                     <StackLayout Grid.Row="2" Orientation="Horizontal" Spacing="5">
                                         <Label Text="Fonte:" 
-                               FontSize="12" 
-                               TextColor="Gray"
-                               FontAttributes="Bold"/>
+                                               FontSize="12" 
+                                               TextColor="Gray"
+                                               FontAttributes="Bold"/>
                                         <Label Text="{Binding Source}" 
-                               FontSize="12" 
-                               TextColor="Gray"/>
+                                               FontSize="12" 
+                                               TextColor="Gray"/>   
                                     </StackLayout>
 
                                     <!-- Botão "Ler mais" -->
                                     <Button Grid.Row="3" 
-                            Text="Ler mais" 
-                            CommandParameter="{Binding Url}" 
-                            Clicked="OnReadMoreClicked"
-                            HorizontalOptions="End"
-                            WidthRequest="100"
-                            HeightRequest="40"
-                            Margin="0,5,0,0"
-                            BackgroundColor="#3498db"
-                            TextColor="White"/>
+                                            Text="Ler mais" 
+                                            CommandParameter="{Binding Url}" 
+                                            Clicked="OnReadMoreClicked"
+                                            HorizontalOptions="End"
+                                            WidthRequest="100"
+                                            HeightRequest="40"
+                                            Margin="0,5,0,0"
+                                            BackgroundColor="#3498db"
+                                            TextColor="White"/> 
                                 </Grid>
                             </Frame>
                         </DataTemplate>
