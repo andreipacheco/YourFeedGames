@@ -32,6 +32,9 @@ namespace YourFeedGames
         // Método separado para inicializar o HttpClient com configurações anti-bloqueio
         private void InitializeHttpClient()
         {
+            // Atualize para um User-Agent mais recente
+            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");
+            
             // Criar um handler para configurar opções avançadas
             var handler = new HttpClientHandler
             {
@@ -49,11 +52,11 @@ namespace YourFeedGames
             Random rand = new Random();
             string[] userAgents = new string[]
             {
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Safari/605.1.15",
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:90.0) Gecko/20100101 Firefox/90.0",
-        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36"
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36",
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Safari/605.1.15",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:90.0) Gecko/20100101 Firefox/90.0",
+                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36"
             };
 
             string selectedUserAgent = userAgents[rand.Next(userAgents.Length)];
@@ -78,41 +81,26 @@ namespace YourFeedGames
         // Método para tentar extrair artigos usando abordagens diferentes dependendo do site
         private async Task<string> GetHtmlContentWithFallbacks(string url)
         {
-            try
+            int retryCount = 0;
+            while (retryCount < 3)
             {
-                // Primeira tentativa - abordagem padrão
-                HttpResponseMessage response = await _httpClient.GetAsync(url);
-
-                // Se bloqueado, mostrar código de status
-                if (!response.IsSuccessStatusCode)
+                try
                 {
-                    Console.WriteLine($"Resposta HTTP: {response.StatusCode} para {url}");
-
-                    // Se for código 403 (Forbidden), tente uma abordagem diferente
-                    if (response.StatusCode == HttpStatusCode.Forbidden)
+                    using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
                     {
-                        // Tentar novamente com cabeçalhos diferentes
-                        InitializeHttpClient(); // Reinicia com novos cabeçalhos
-                        response = await _httpClient.GetAsync(url);
-
-                        if (!response.IsSuccessStatusCode)
-                        {
-                            throw new HttpRequestException($"Bloqueado com status: {response.StatusCode}");
-                        }
-                    }
-                    else
-                    {
-                        throw new HttpRequestException($"Erro HTTP: {response.StatusCode}");
+                        var response = await _httpClient.GetAsync(url, cts.Token);
+                        response.EnsureSuccessStatusCode();
+                        return await response.Content.ReadAsStringAsync();
                     }
                 }
-
-                return await response.Content.ReadAsStringAsync();
+                catch (Exception ex) when (retryCount < 2)
+                {
+                    retryCount++;
+                    Console.WriteLine($"Tentativa {retryCount} falhou para {url}. Erro: {ex.Message}");
+                    await Task.Delay(1000 * retryCount); // Espera progressiva
+                }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Erro ao obter HTML: {ex.Message}");
-                throw;
-            }
+            throw new HttpRequestException($"Não foi possível obter conteúdo de {url} após 3 tentativas");
         }
 
         // Método para extrair artigos de scripts de dados estruturados (JSON)
@@ -242,35 +230,41 @@ namespace YourFeedGames
         {
             try
             {
-                // Limpar feed atual antes de carregar novos itens
                 NewsFeed.Clear();
-
-                // Exibir indicador de carregamento
                 loadingIndicator.IsVisible = true;
                 feedScrollView.IsVisible = false;
 
                 var enabledPortals = new List<NewsPortal>
+        {
+            new NewsPortal { Name = "Flow Games", Url = "https://flowgames.gg", IsEnabled = Preferences.Get("Flow Games", true) },
+            new NewsPortal { Name = "Gameplayscassi", Url = "https://gameplayscassi.com.br", IsEnabled = Preferences.Get("Gameplayscassi", true) },
+            new NewsPortal { Name = "The Enemy", Url = "https://www.theenemy.com.br", IsEnabled = Preferences.Get("The Enemy", true) },
+            new NewsPortal { Name = "IGN Brasil", Url = "https://br.ign.com", IsEnabled = Preferences.Get("IGN Brasil", true) },
+            new NewsPortal { Name = "Voxel", Url = "https://voxel.com.br", IsEnabled = Preferences.Get("Voxel", true) },
+            new NewsPortal { Name = "GameVicio", Url = "https://www.gamevicio.com", IsEnabled = Preferences.Get("GameVicio", true) }
+        };
+
+                // Debug: Mostrar quais portais estão habilitados
+                Console.WriteLine("Portais habilitados:");
+                foreach (var portal in enabledPortals)
                 {
-                    new NewsPortal { Name = "Flow Games", Url = "https://flowgames.gg", IsEnabled = Preferences.Get("Flow Games", true) },
-                    new NewsPortal { Name = "Gameplayscassi", Url = "https://gameplayscassi.com.br", IsEnabled = Preferences.Get("Gameplayscassi", true) },
-                    new NewsPortal { Name = "The Enemy", Url = "https://www.theenemy.com.br", IsEnabled = Preferences.Get("The Enemy", true) },
-                    new NewsPortal { Name = "IGN Brasil", Url = "https://br.ign.com", IsEnabled = Preferences.Get("IGN Brasil", true) }
-                };
+                    Console.WriteLine($"{portal.Name}: {(portal.IsEnabled ? "Sim" : "Não")}");
+                }
 
                 foreach (var portal in enabledPortals.Where(p => p.IsEnabled))
                 {
                     try
                     {
+                        Console.WriteLine($"Processando portal: {portal.Name}");
                         await FetchNewsFromPortal(portal);
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Erro ao carregar notícias de {portal.Name}: {ex.Message}");
-                        // Adicionar um item de notícia indicando erro
+                        Console.WriteLine($"Erro no portal {portal.Name}: {ex.Message}");
                         NewsFeed.Add(new NewsItem
                         {
-                            Title = $"Erro ao carregar notícias de {portal.Name}",
-                            Description = "Não foi possível obter o feed deste portal no momento.",
+                            Title = $"Erro ao carregar {portal.Name}",
+                            Description = ex.Message,
                             Source = portal.Name,
                             Url = portal.Url
                         });
@@ -284,7 +278,6 @@ namespace YourFeedGames
             }
             finally
             {
-                // Ocultar indicador de carregamento
                 loadingIndicator.IsVisible = false;
                 feedScrollView.IsVisible = true;
             }
@@ -439,6 +432,13 @@ namespace YourFeedGames
                     case "IGN Brasil":
                         ParseIGNBrasil(htmlDoc, portal);
                         break;
+                    case "Voxel":
+                        ParseVoxel(htmlDoc, portal);
+                        break;
+                    case "GameVicio":
+                        ParseGameVicio(htmlDoc, portal);
+                        break;
+
                 }
             }
             catch (TaskCanceledException)
@@ -452,6 +452,206 @@ namespace YourFeedGames
                 throw;
             }
         }
+
+        private void ParseVoxel(HtmlDocument htmlDoc, NewsPortal portal)
+        {
+            try
+            {
+                Console.WriteLine("Tentando parsear Voxel (TecMundo)...");
+
+                // Tentativa 1: Notícias principais no novo formato TecMundo/Voxel
+                var newsNodes = htmlDoc.DocumentNode.SelectNodes("//div[contains(@class, 'tec--card__content')]//a[contains(@class, 'tec--card__title__link')]");
+
+                // Tentativa 2: Notícias em listagem
+                if (newsNodes == null || !newsNodes.Any())
+                {
+                    newsNodes = htmlDoc.DocumentNode.SelectNodes("//article[contains(@class, 'tec--card')]//h3/a");
+                }
+
+                // Tentativa 3: Notícias em formato de manchete
+                if (newsNodes == null || !newsNodes.Any())
+                {
+                    newsNodes = htmlDoc.DocumentNode.SelectNodes("//a[contains(@class, 'tec--card__title__link')]");
+                }
+
+                if (newsNodes != null && newsNodes.Any())
+                {
+                    Console.WriteLine($"Encontrados {newsNodes.Count} nós de notícia no Voxel");
+
+                    var processedUrls = new HashSet<string>();
+                    foreach (var node in newsNodes.Take(10))
+                    {
+                        var url = node.GetAttributeValue("href", "");
+                        var title = CleanHtml(node.InnerText.Trim());
+
+                        // Corrigir URL para o formato correto
+                        if (!string.IsNullOrEmpty(url))
+                        {
+                            if (url.StartsWith("/voxel"))
+                            {
+                                url = "https://www.tecmundo.com.br" + url;
+                            }
+                            else if (!url.StartsWith("http"))
+                            {
+                                url = new Uri(new Uri("https://www.tecmundo.com.br/voxel"), url).ToString();
+                            }
+                        }
+
+                        if (!string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(url) && !processedUrls.Contains(url))
+                        {
+                            NewsFeed.Add(new NewsItem
+                            {
+                                Title = title,
+                                Url = url,
+                                Source = portal.Name
+                            });
+                            processedUrls.Add(url);
+                            Console.WriteLine($"Adicionado: {title}");
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Nenhuma notícia encontrada no Voxel - Tentando extrair do JSON embutido");
+                    TryExtractArticlesFromStructuredData(htmlDoc, portal);
+
+                    // Se ainda não encontrou, tentar uma abordagem mais agressiva
+                    if (!NewsFeed.Any(item => item.Source == portal.Name))
+                    {
+                        Console.WriteLine("Tentando abordagem alternativa para Voxel");
+                        ParseVoxelAlternative(htmlDoc, portal);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao parsear Voxel: {ex.Message}");
+            }
+        }
+
+        // Método alternativo para quando o parsing principal falhar
+        private void ParseVoxelAlternative(HtmlDocument htmlDoc, NewsPortal portal)
+        {
+            try
+            {
+                // Tentar encontrar qualquer link que pareça ser de notícia
+                var allLinks = htmlDoc.DocumentNode.SelectNodes("//a[contains(@href, '/noticia/') or contains(@href, '/voxel/')]");
+
+                if (allLinks != null && allLinks.Any())
+                {
+                    var processedUrls = new HashSet<string>();
+                    var addedCount = 0;
+
+                    foreach (var node in allLinks)
+                    {
+                        if (addedCount >= 10) break;
+
+                        var url = node.GetAttributeValue("href", "");
+                        var title = CleanHtml(node.InnerText.Trim());
+
+                        // Filtrar URLs que não são de notícias
+                        if (string.IsNullOrEmpty(url) ||
+                            url.Contains("/tag/") ||
+                            url.Contains("/busca/") ||
+                            url.Contains("/autor/") ||
+                            title.Length < 10)
+                        {
+                            continue;
+                        }
+
+                        // Corrigir URL
+                        if (!url.StartsWith("http"))
+                        {
+                            url = "https://www.tecmundo.com.br" + (url.StartsWith("/") ? url : "/" + url);
+                        }
+
+                        if (!processedUrls.Contains(url))
+                        {
+                            NewsFeed.Add(new NewsItem
+                            {
+                                Title = title,
+                                Url = url,
+                                Source = portal.Name
+                            });
+                            processedUrls.Add(url);
+                            addedCount++;
+                            Console.WriteLine($"Adicionado (alternativo): {title}");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro no parser alternativo do Voxel: {ex.Message}");
+            }
+        }
+
+        private void ParseGameVicio(HtmlDocument htmlDoc, NewsPortal portal)
+        {
+            try
+            {
+                Console.WriteLine("Tentando parsear GameVicio...");
+
+                // Tentativa 1: Notícias em destaque (slide)
+                var featuredNews = htmlDoc.DocumentNode.SelectNodes("//div[contains(@class, 'slide-home-item-new')]//a[contains(@class, 'slide-home-img-new')]");
+
+                // Tentativa 2: Notícias na lista principal
+                var mainNews = htmlDoc.DocumentNode.SelectNodes("//div[contains(@class, 'nav-video-item')]//a[contains(@class, 'nv-item-title')]");
+
+                // Tentativa 3: Notícias em boxes
+                var boxNews = htmlDoc.DocumentNode.SelectNodes("//div[contains(@class, 'box-noticia-home')]//a[contains(@class, 'box-noticia-link')]");
+
+                var allNews = new List<HtmlNode>();
+                if (featuredNews != null) allNews.AddRange(featuredNews);
+                if (mainNews != null) allNews.AddRange(mainNews);
+                if (boxNews != null) allNews.AddRange(boxNews);
+
+                if (allNews.Any())
+                {
+                    Console.WriteLine($"Encontrados {allNews.Count} nós de notícia no GameVicio");
+
+                    var processedUrls = new HashSet<string>();
+                    foreach (var node in allNews.Take(15)) // Pegar mais para filtrar duplicatas
+                    {
+                        var url = node.GetAttributeValue("href", "");
+                        var title = node.GetAttributeValue("title", "");
+
+                        if (string.IsNullOrEmpty(title))
+                        {
+                            title = CleanHtml(node.InnerText);
+                        }
+
+                        if (!string.IsNullOrEmpty(url) && !url.StartsWith("http"))
+                        {
+                            url = new Uri(new Uri(portal.Url), url).ToString();
+                        }
+
+                        if (!string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(url) && !processedUrls.Contains(url))
+                        {
+                            NewsFeed.Add(new NewsItem
+                            {
+                                Title = title,
+                                Url = url,
+                                Source = portal.Name
+                            });
+                            processedUrls.Add(url);
+                            Console.WriteLine($"Adicionado: {title}");
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Nenhuma notícia encontrada no GameVicio");
+                    // Tentar extrair de scripts JSON
+                    TryExtractArticlesFromStructuredData(htmlDoc, portal);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao parsear GameVicio: {ex.Message}");
+            }
+        }
+
 
         private void ParseIGNBrasil(HtmlDocument htmlDoc, NewsPortal portal)
         {
