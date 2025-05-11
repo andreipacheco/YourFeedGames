@@ -1,0 +1,19 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="YourFeedGames.SettingsPage"
+             Title="Configurações">
+    <StackLayout Padding="20">
+        <Label Text="Selecione os portais de notícias:" FontSize="20" />
+        <CollectionView ItemsSource="{Binding NewsPortals}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <StackLayout Orientation="Horizontal" Padding="10">
+                        <Label Text="{Binding Name}" VerticalOptions="Center" />
+                        <Switch IsToggled="{Binding IsEnabled}" VerticalOptions="Center" />
+                    </StackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+        <Button Text="Salvar Configurações" Command="{Binding SaveCommand}" />
+    </StackLayout>
+</ContentPage>

@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="YourFeedGames.MainPage"
+             xmlns:converters="clr-namespace:YourFeedGames.Converters"
+             Title="Feed de Notícias">
+
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*" Padding="10">
+        <!-- Barra superior com título e botões -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Margin="0,0,0,10">
+            <Label Grid.Column="0" 
+                   Text="YourFeed Games" 
+                   FontSize="24" 
+                   FontAttributes="Bold" 
+                   VerticalOptions="Center"/>
+
+            <!-- Botão de atualizar -->
+            <Button Grid.Column="1"
+                    Text="Atualizar"
+                    Clicked="OnRefreshClicked"
+                    WidthRequest="100"
+                    Margin="0,0,10,0"/>
+
+            <Button Grid.Column="2" 
+                    Text="Configurações" 
+                    Clicked="OnSettingsClicked"
+                    WidthRequest="120"/>
+        </Grid>
+
+        <!-- Conteúdo principal -->
+        <Grid Grid.Row="1">
+            <!-- Indicador de carregamento -->
+            <ActivityIndicator x:Name="loadingIndicator" 
+                               IsRunning="True" 
+                               HorizontalOptions="Center" 
+                               VerticalOptions="Center"
+                               IsVisible="False"/>
+
+            <!-- ScrollView contendo as notícias -->
+            <ScrollView x:Name="feedScrollView">
+                <CollectionView ItemsSource="{Binding NewsFeed}" 
+                                EmptyView="Nenhuma notícia disponível no momento">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame BorderColor="LightGray" 
+                                   CornerRadius="10" 
+                                   Margin="0,5,0,10" 
+                                   Padding="15">
+                                <Grid RowDefinitions="Auto,Auto,Auto,Auto" 
+                                      RowSpacing="8">
+
+                                    <!-- Título da notícia -->
+                                    <Label Grid.Row="0" 
+                                           Text="{Binding Title}" 
+                                           FontSize="18" 
+                                           FontAttributes="Bold" 
+                                           LineBreakMode="WordWrap"/>
+
+                                    <!-- Descrição da notícia (se disponível) -->
+                                    <Label Grid.Row="1" 
+                                           Text="{Binding Description}" 
+                                           FontSize="14" 
+                                           IsVisible="{Binding Description, Converter={StaticResource StringNotEmptyConverter}}"
+                                           Margin="0,5,0,0"
+                                           LineBreakMode="TailTruncation"
+                                           MaxLines="3"/>
+
+                                    <!-- Fonte da notícia com estilo melhorado -->
+                                    <StackLayout Grid.Row="2" Orientation="Horizontal" Spacing="5">
+                                        <Label Text="Fonte:" 
+                                               FontSize="12" 
+                                               TextColor="Gray"
+                                               FontAttributes="Bold"/>
+                                        <Label Text="{Binding Source}" 
+                                               FontSize="12" 
+                                               TextColor="Gray"/>
+                                    </StackLayout>
+
+                                    <!-- Botão "Ler mais" com estilo melhorado -->
+                                    <Button Grid.Row="3" 
+                                            Text="Ler mais" 
+                                            CommandParameter="{Binding Url}" 
+                                            Clicked="OnReadMoreClicked"
+                                            HorizontalOptions="End"
+                                            WidthRequest="100"
+                                            HeightRequest="40"
+                                            Margin="0,5,0,0"
+                                            BackgroundColor="#3498db"
+                                            TextColor="White"/>
+                                </Grid>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </ScrollView>
+        </Grid>
+    </Grid>
+</ContentPage>
