@@ -12,88 +12,108 @@
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <Grid RowDefinitions="Auto,*" Padding="10">
+    <Grid RowDefinitions="Auto,*,Auto" Padding="10">
         <!-- Barra superior com título e botões -->
         <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Margin="0,0,0,10">
             <Label Grid.Column="0" 
-                   Text="YourFeed Games" 
-                   FontSize="24" 
-                   FontAttributes="Bold" 
-                   VerticalOptions="Center"/>
+               Text="YourFeed Games" 
+               FontSize="24" 
+               FontAttributes="Bold" 
+               VerticalOptions="Center"/>
 
-            <!-- Botão de atualizar -->
             <Button Grid.Column="1"
-                    Text="Atualizar"
-                    Clicked="OnRefreshClicked"
-                    WidthRequest="100"
-                    Margin="0,0,10,0"/>
+                Text="Atualizar"
+                Clicked="OnRefreshClicked"
+                WidthRequest="100"
+                Margin="0,0,10,0"/>
 
             <Button Grid.Column="2" 
-                    Text="Configurações" 
-                    Clicked="OnSettingsClicked"
-                    WidthRequest="120"/>
+                Text="Configurações" 
+                Clicked="OnSettingsClicked"
+                WidthRequest="120"/>
         </Grid>
 
         <!-- Conteúdo principal -->
         <Grid Grid.Row="1">
-            <!-- Indicador de carregamento -->
-            <ActivityIndicator x:Name="loadingIndicator" 
-                               IsRunning="True" 
-                               HorizontalOptions="Center" 
-                               VerticalOptions="Center"
-                               IsVisible="False"/>
+            <!-- Container de loading -->
+            <StackLayout x:Name="loadingContainer" 
+                    IsVisible="False"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    Spacing="20">
+                <ActivityIndicator x:Name="loadingIndicator"
+                             IsRunning="True" 
+                             Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource Secondary}}"
+                             HeightRequest="50"
+                             WidthRequest="50"/>
 
-            <!-- ScrollView contendo as notícias -->
+                <Label x:Name="loadingLabel" 
+                   Text="Carregando feeds de notícias..." 
+                   FontSize="16"
+                   HorizontalOptions="Center"/>
+
+                <ProgressBar x:Name="loadingProgress" 
+                         Progress="0"
+                         ProgressColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource Secondary}}"
+                         WidthRequest="300"/>
+
+                <Button x:Name="cancelLoadingButton" 
+                    Text="Cancelar" 
+                    Clicked="OnCancelLoadingClicked"
+                    IsVisible="False"
+                    HorizontalOptions="Center"/>
+            </StackLayout>
+
+            <!-- ScrollView com as notícias -->
             <ScrollView x:Name="feedScrollView">
                 <CollectionView ItemsSource="{Binding NewsFeed}" 
-                                EmptyView="Nenhuma notícia disponível no momento">
+               EmptyView="Nenhuma notícia disponível no momento">
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
                             <Frame BorderColor="LightGray" 
-                                   CornerRadius="10" 
-                                   Margin="0,5,0,10" 
-                                   Padding="15">
+                   CornerRadius="10" 
+                   Margin="0,5,0,10" 
+                   Padding="15">
                                 <Grid RowDefinitions="Auto,Auto,Auto,Auto" 
-                                      RowSpacing="8">
-
+                      RowSpacing="8">
                                     <!-- Título da notícia -->
                                     <Label Grid.Row="0" 
-                                           Text="{Binding Title}" 
-                                           FontSize="18" 
-                                           FontAttributes="Bold" 
-                                           LineBreakMode="WordWrap"/>
+                           Text="{Binding Title}" 
+                           FontSize="18" 
+                           FontAttributes="Bold" 
+                           LineBreakMode="WordWrap"/>
 
                                     <!-- Descrição da notícia (se disponível) -->
                                     <Label Grid.Row="1" 
-                                           Text="{Binding Description}" 
-                                           FontSize="14" 
-                                           IsVisible="{Binding Description, Converter={StaticResource StringNotEmptyConverter}}"
-                                           Margin="0,5,0,0"
-                                           LineBreakMode="TailTruncation"
-                                           MaxLines="3"/>
+                           Text="{Binding Description}" 
+                           FontSize="14"
+                           IsVisible="{Binding Description, Converter={StaticResource StringNotEmptyConverter}}"
+                           Margin="0,5,0,0"
+                           LineBreakMode="TailTruncation"
+                           MaxLines="3"/>
 
-                                    <!-- Fonte da notícia com estilo melhorado -->
+                                    <!-- Fonte da notícia -->
                                     <StackLayout Grid.Row="2" Orientation="Horizontal" Spacing="5">
                                         <Label Text="Fonte:" 
-                                               FontSize="12" 
-                                               TextColor="Gray"
-                                               FontAttributes="Bold"/>
+                               FontSize="12" 
+                               TextColor="Gray"
+                               FontAttributes="Bold"/>
                                         <Label Text="{Binding Source}" 
-                                               FontSize="12" 
-                                               TextColor="Gray"/>
+                               FontSize="12" 
+                               TextColor="Gray"/>
                                     </StackLayout>
 
-                                    <!-- Botão "Ler mais" com estilo melhorado -->
+                                    <!-- Botão "Ler mais" -->
                                     <Button Grid.Row="3" 
-                                            Text="Ler mais" 
-                                            CommandParameter="{Binding Url}" 
-                                            Clicked="OnReadMoreClicked"
-                                            HorizontalOptions="End"
-                                            WidthRequest="100"
-                                            HeightRequest="40"
-                                            Margin="0,5,0,0"
-                                            BackgroundColor="#3498db"
-                                            TextColor="White"/>
+                            Text="Ler mais" 
+                            CommandParameter="{Binding Url}" 
+                            Clicked="OnReadMoreClicked"
+                            HorizontalOptions="End"
+                            WidthRequest="100"
+                            HeightRequest="40"
+                            Margin="0,5,0,0"
+                            BackgroundColor="#3498db"
+                            TextColor="White"/>
                                 </Grid>
                             </Frame>
                         </DataTemplate>
@@ -101,5 +121,14 @@
                 </CollectionView>
             </ScrollView>
         </Grid>
+
+        <!-- Barra de status inferior -->
+        <Label x:Name="statusLabel"
+           Grid.Row="2"
+           Text=""
+           FontSize="12"
+           TextColor="Gray"
+           Margin="0,10,0,0"
+           HorizontalOptions="Center"/>
     </Grid>
 </ContentPage>

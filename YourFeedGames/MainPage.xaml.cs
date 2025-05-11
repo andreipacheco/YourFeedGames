@@ -11,6 +11,8 @@ namespace YourFeedGames
         public ObservableCollection<NewsItem> NewsFeed { get; set; }
         private HttpClient _httpClient;
         private bool _debugMode = false;
+        private CancellationTokenSource _loadingCts;
+        private DateTime _loadingStartTime;
 
         public MainPage()
         {
@@ -26,7 +28,8 @@ namespace YourFeedGames
             // Inicializar o cliente HTTP com mais opções
             InitializeHttpClient();
 
-            LoadNewsFeed();
+            // Inicia o carregamento das notícias
+            Task.Run(async () => await LoadNewsFeed());
         }
 
         // Método separado para inicializar o HttpClient com configurações anti-bloqueio
@@ -226,61 +229,167 @@ namespace YourFeedGames
             }
         }
 
-        private async void LoadNewsFeed()
+        private async Task LoadNewsFeed()
         {
             try
             {
-                NewsFeed.Clear();
-                loadingIndicator.IsVisible = true;
-                feedScrollView.IsVisible = false;
+                // Inicializa o estado de carregamento
+                _loadingCts = new CancellationTokenSource();
+                _loadingStartTime = DateTime.Now;
 
+                // Atualiza a UI para estado de carregamento
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    NewsFeed.Clear();
+                    feedScrollView.IsVisible = false;
+                    loadingContainer.IsVisible = true;
+                    cancelLoadingButton.IsVisible = true;
+                    loadingProgress.Progress = 0;
+                    loadingLabel.Text = "Preparando para carregar notícias...";
+                    statusLabel.Text = "Iniciando...";
+                });
+
+                // Lista de portais habilitados
                 var enabledPortals = new List<NewsPortal>
         {
             new NewsPortal { Name = "Flow Games", Url = "https://flowgames.gg", IsEnabled = Preferences.Get("Flow Games", true) },
             new NewsPortal { Name = "Gameplayscassi", Url = "https://gameplayscassi.com.br", IsEnabled = Preferences.Get("Gameplayscassi", true) },
             new NewsPortal { Name = "The Enemy", Url = "https://www.theenemy.com.br", IsEnabled = Preferences.Get("The Enemy", true) },
             new NewsPortal { Name = "IGN Brasil", Url = "https://br.ign.com", IsEnabled = Preferences.Get("IGN Brasil", true) },
-            new NewsPortal { Name = "Voxel", Url = "https://voxel.com.br", IsEnabled = Preferences.Get("Voxel", true) },
+            new NewsPortal { Name = "Voxel", Url = "https://www.tecmundo.com.br/voxel", IsEnabled = Preferences.Get("Voxel", true) },
             new NewsPortal { Name = "GameVicio", Url = "https://www.gamevicio.com", IsEnabled = Preferences.Get("GameVicio", true) }
         };
 
-                // Debug: Mostrar quais portais estão habilitados
-                Console.WriteLine("Portais habilitados:");
-                foreach (var portal in enabledPortals)
-                {
-                    Console.WriteLine($"{portal.Name}: {(portal.IsEnabled ? "Sim" : "Não")}");
-                }
+                var activePortals = enabledPortals.Where(p => p.IsEnabled).ToList();
+                int totalPortals = activePortals.Count;
+                int completedPortals = 0;
 
-                foreach (var portal in enabledPortals.Where(p => p.IsEnabled))
+                // Atualiza o status inicial
+                await UpdateStatus($"Carregando {totalPortals} fontes de notícias...");
+                await UpdateLoadingProgress(0, totalPortals);
+
+                // Processa cada portal
+                foreach (var portal in activePortals)
                 {
+                    // Verifica se o usuário cancelou
+                    _loadingCts.Token.ThrowIfCancellationRequested();
+
                     try
                     {
-                        Console.WriteLine($"Processando portal: {portal.Name}");
+                        // Atualiza o status para o portal atual
+                        await UpdateStatus($"Conectando com {portal.Name}...");
+                        await UpdateLoadingLabel($"Carregando notícias de {portal.Name}");
+
+                        // Busca as notícias do portal
                         await FetchNewsFromPortal(portal);
+
+                        // Atualiza o progresso
+                        completedPortals++;
+                        await UpdateLoadingProgress(completedPortals, totalPortals);
+                        await UpdateStatus($"{completedPortals} de {totalPortals} portais carregados");
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        await UpdateStatus("Carregamento cancelado pelo usuário");
+                        return;
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Erro no portal {portal.Name}: {ex.Message}");
-                        NewsFeed.Add(new NewsItem
+                        Console.WriteLine($"Erro ao carregar {portal.Name}: {ex.Message}");
+
+                        // Adiciona um item de erro à lista
+                        Device.BeginInvokeOnMainThread(() =>
                         {
-                            Title = $"Erro ao carregar {portal.Name}",
-                            Description = ex.Message,
-                            Source = portal.Name,
-                            Url = portal.Url
+                            NewsFeed.Add(new NewsItem
+                            {
+                                Title = $"Erro ao carregar {portal.Name}",
+                                Description = ex.Message.Length > 100 ? ex.Message.Substring(0, 100) + "..." : ex.Message,
+                                Source = portal.Name,
+                                Url = portal.Url
+                            });
                         });
+
+                        await UpdateStatus($"Erro ao carregar {portal.Name}");
                     }
                 }
+
+                // Finalização com sucesso
+                var loadingTime = DateTime.Now - _loadingStartTime;
+                await UpdateStatus($"Carregamento completo - {NewsFeed.Count} notícias em {loadingTime.TotalSeconds:F1}s");
+
+                // Ordena as notícias por fonte
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    var sortedNews = new ObservableCollection<NewsItem>(
+                        NewsFeed.OrderBy(item => item.Source));
+                    NewsFeed.Clear();
+                    foreach (var item in sortedNews)
+                    {
+                        NewsFeed.Add(item);
+                    }
+                });
+            }
+            catch (OperationCanceledException)
+            {
+                await UpdateStatus("Carregamento cancelado pelo usuário");
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Erro geral: {ex.Message}");
+                await UpdateStatus("Erro ao carregar o feed");
                 await DisplayAlert("Erro", "Houve um problema ao carregar o feed de notícias.", "OK");
             }
             finally
             {
-                loadingIndicator.IsVisible = false;
-                feedScrollView.IsVisible = true;
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    loadingContainer.IsVisible = false;
+                    feedScrollView.IsVisible = true;
+                    cancelLoadingButton.IsVisible = false;
+
+                    if (!NewsFeed.Any())
+                    {
+                        statusLabel.Text = "Nenhuma notícia foi carregada. Verifique sua conexão.";
+                    }
+                });
+
+                _loadingCts?.Dispose();
+                _loadingCts = null;
             }
+        }
+
+        // Métodos auxiliares para atualizar a UI
+        private async Task UpdateStatus(string message)
+        {
+            await Device.InvokeOnMainThreadAsync(async () =>
+            {
+                await statusLabel.FadeTo(0, 100);
+                statusLabel.Text = message;
+                await statusLabel.FadeTo(1, 100);
+            });
+        }
+
+        private async Task UpdateLoadingLabel(string message)
+        {
+            await Device.InvokeOnMainThreadAsync(() =>
+            {
+                loadingLabel.Text = message;
+            });
+        }
+
+        private async Task UpdateLoadingProgress(int completed, int total)
+        {
+            await Device.InvokeOnMainThreadAsync(() =>
+            {
+                loadingProgress.Progress = (double)completed / total;
+            });
+        }
+
+        // Método para o botão de cancelamento
+        private void OnCancelLoadingClicked(object sender, EventArgs e)
+        {
+            _loadingCts?.Cancel();
+            cancelLoadingButton.IsVisible = false;
         }
 
         private async void OnSettingsClicked(object sender, EventArgs e)
@@ -302,8 +411,16 @@ namespace YourFeedGames
         // Add this method to your MainPage class to help with debugging
         private async void OnRefreshClicked(object sender, EventArgs e)
         {
-            await LoadNewsFeedWithDebug();
+            // Cancela qualquer carregamento em andamento
+            _loadingCts?.Cancel();
+
+            // Pequeno delay para garantir que o cancelamento foi processado
+            await Task.Delay(100);
+
+            // Inicia um novo carregamento
+            await LoadNewsFeed();
         }
+
 
         // Enhanced version of LoadNewsFeed with better debugging
         private async Task LoadNewsFeedWithDebug()
