@@ -20,7 +20,8 @@ namespace YourFeedGames
                 new NewsPortal { Name = "The Enemy", Url = "https://www.theenemy.com.br/", IsEnabled = true },
                 new NewsPortal { Name = "IGN Brasil", Url = "https://br.ign.com/", IsEnabled = true },
                 new NewsPortal { Name = "Voxel", Url = "https://voxel.com.br", IsEnabled = Preferences.Get("Voxel", true) },
-                new NewsPortal { Name = "GameVicio", Url = "https://www.gamevicio.com", IsEnabled = Preferences.Get("GameVicio", true) }
+                new NewsPortal { Name = "GameVicio", Url = "https://www.gamevicio.com", IsEnabled = Preferences.Get("GameVicio", true) },
+                new NewsPortal { Name = "TechTudo", Url = "https://www.techtudo.com.br/jogos/", IsEnabled = Preferences.Get("TechTudo", true) }
             };
 
             SaveCommand = new Command(SaveSettings);
@@ -28,14 +29,17 @@ namespace YourFeedGames
             BindingContext = this;
         }
 
-        private void SaveSettings()
+        private async void SaveSettings()
         {
             foreach (var portal in NewsPortals)
             {
                 Preferences.Set(portal.Name, portal.IsEnabled);
             }
 
-            DisplayAlert("Configurações", "Configurações salvas com sucesso!", "OK");
+            await DisplayAlert("Configurações", "Configurações salvas com sucesso!", "OK");
+
+            // Navegar de volta para a página inicial
+            await Shell.Current.GoToAsync("///MainPage");
         }
     }
 }

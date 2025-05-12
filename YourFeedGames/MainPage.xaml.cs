@@ -251,14 +251,15 @@ namespace YourFeedGames
 
                 // Lista de portais habilitados
                 var enabledPortals = new List<NewsPortal>
-        {
-            new NewsPortal { Name = "Flow Games", Url = "https://flowgames.gg", IsEnabled = Preferences.Get("Flow Games", true) },
-            new NewsPortal { Name = "Gameplayscassi", Url = "https://gameplayscassi.com.br", IsEnabled = Preferences.Get("Gameplayscassi", true) },
-            new NewsPortal { Name = "The Enemy", Url = "https://www.theenemy.com.br", IsEnabled = Preferences.Get("The Enemy", true) },
-            new NewsPortal { Name = "IGN Brasil", Url = "https://br.ign.com", IsEnabled = Preferences.Get("IGN Brasil", true) },
-            new NewsPortal { Name = "Voxel", Url = "https://www.tecmundo.com.br/voxel", IsEnabled = Preferences.Get("Voxel", true) },
-            new NewsPortal { Name = "GameVicio", Url = "https://www.gamevicio.com", IsEnabled = Preferences.Get("GameVicio", true) }
-        };
+                {
+                    new NewsPortal { Name = "Flow Games", Url = "https://flowgames.gg", IsEnabled = Preferences.Get("Flow Games", true) },
+                    new NewsPortal { Name = "Gameplayscassi", Url = "https://gameplayscassi.com.br", IsEnabled = Preferences.Get("Gameplayscassi", true) },
+                    new NewsPortal { Name = "The Enemy", Url = "https://www.theenemy.com.br", IsEnabled = Preferences.Get("The Enemy", true) },
+                    new NewsPortal { Name = "IGN Brasil", Url = "https://br.ign.com", IsEnabled = Preferences.Get("IGN Brasil", true) },
+                    new NewsPortal { Name = "Voxel", Url = "https://www.tecmundo.com.br/voxel", IsEnabled = Preferences.Get("Voxel", true) },
+                    new NewsPortal { Name = "GameVicio", Url = "https://www.gamevicio.com", IsEnabled = Preferences.Get("GameVicio", true) },
+                    new NewsPortal { Name = "TechTudo", Url = "https://www.techtudo.com.br/jogos/", IsEnabled = Preferences.Get("TechTudo", true) }
+                };
 
                 var activePortals = enabledPortals.Where(p => p.IsEnabled).ToList();
                 int totalPortals = activePortals.Count;
@@ -555,7 +556,9 @@ namespace YourFeedGames
                     case "GameVicio":
                         ParseGameVicio(htmlDoc, portal);
                         break;
-
+                    case "TechTudo":
+                        ParseTechTudo(htmlDoc, portal);
+                        break;
                 }
             }
             catch (TaskCanceledException)
@@ -1205,6 +1208,70 @@ namespace YourFeedGames
                 Console.WriteLine("HTML recebido: " + htmlDoc.DocumentNode.OuterHtml.Length + " caracteres");
             }
         }
+
+        private void ParseTechTudo(HtmlDocument htmlDoc, NewsPortal portal)
+        {
+            try
+            {
+                Console.WriteLine("Tentando parsear TechTudo...");
+
+                // Selecionar os nós das notícias
+                var newsNodes = htmlDoc.DocumentNode.SelectNodes("//div[contains(@class, 'feed-post-body')]");
+
+                if (newsNodes != null && newsNodes.Any())
+                {
+                    Console.WriteLine($"Encontrados {newsNodes.Count} nós de notícia no TechTudo");
+
+                    var processedUrls = new HashSet<string>();
+                    foreach (var node in newsNodes.Take(10)) // Limitar a 10 notícias
+                    {
+                        // Extrair título
+                        var titleNode = node.SelectSingleNode(".//a[contains(@class, 'feed-post-link')]");
+                        var title = titleNode?.InnerText.Trim();
+
+                        // Extrair URL
+                        var url = titleNode?.GetAttributeValue("href", "");
+
+                        // Extrair imagem
+                        var imgNode = node.SelectSingleNode(".//img");
+                        var imageUrl = imgNode?.GetAttributeValue("src", "");
+
+                        // Garantir que a URL seja absoluta
+                        if (!string.IsNullOrEmpty(url) && !url.StartsWith("http"))
+                        {
+                            url = new Uri(new Uri(portal.Url), url).ToString();
+                        }
+
+                        if (!string.IsNullOrEmpty(imageUrl) && !imageUrl.StartsWith("http"))
+                        {
+                            imageUrl = new Uri(new Uri(portal.Url), imageUrl).ToString();
+                        }
+
+                        // Adicionar notícia ao feed
+                        if (!string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(url) && !processedUrls.Contains(url))
+                        {
+                            NewsFeed.Add(new NewsItem
+                            {
+                                Title = title,
+                                Url = url,
+                                Source = portal.Name,
+                                ImageUrl = imageUrl
+                            });
+                            processedUrls.Add(url);
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Nenhuma notícia encontrada no TechTudo");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao parsear TechTudo: {ex.Message}");
+            }
+        }
+
 
         private string CleanHtml(string input)
         {
