@@ -398,6 +398,11 @@ namespace YourFeedGames
             await Shell.Current.GoToAsync("///SettingsPage");
         }
 
+        private async void OnHotNewsClicked(object sender, EventArgs e)
+        {
+            await Shell.Current.GoToAsync("///HotNewsPage");
+        }
+
         private async void OnReadMoreClicked(object sender, EventArgs e)
         {
             var button = sender as Button;

@@ -14,24 +14,45 @@
 
     <Grid RowDefinitions="Auto,*,Auto" Padding="10">
         <!-- Barra superior com título e botões -->
-        <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Margin="0,0,0,10">
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto,Auto" Margin="0,0,0,10">
+            <!-- Título -->
             <Label Grid.Column="0" 
-               Text="Your Feed Games" 
-               FontSize="24" 
-               FontAttributes="Bold" 
-               VerticalOptions="Center"/>
+                   Text="Your Feed Games" 
+                   FontSize="Title" 
+                   FontAttributes="Bold" 
+                   VerticalOptions="Center" />
 
+            <!-- Botão de Refresh -->
             <Button Grid.Column="1"
-                ImageSource="sync_24dp.png"
-                Clicked="OnRefreshClicked"
-                WidthRequest="60"
-                Margin="0,0,10,0"/>
+                    ImageSource="sync_24dp.png"
+                    Clicked="OnRefreshClicked"
+                    WidthRequest="50"
+                    HeightRequest="50"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    Margin="0,0,5,0" />
 
-            <Button Grid.Column="2" 
-                ImageSource="settings_24dp.png"
-                Clicked="OnSettingsClicked"
-                WidthRequest="60"/>
+            <!-- Botão de Hot News -->
+            <Button Grid.Column="2"
+                    ImageSource="mode_heat_red_24dp.png"
+                    Clicked="OnHotNewsClicked"
+                    WidthRequest="50"
+                    HeightRequest="50"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    Margin="5,0,5,0" />
+
+            <!-- Botão de Configurações -->
+            <Button Grid.Column="3" 
+                    ImageSource="settings_24dp.png"
+                    Clicked="OnSettingsClicked"
+                    WidthRequest="50"
+                    HeightRequest="50"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    Margin="5,0,0,0" />
         </Grid>
+
 
         <!-- Conteúdo principal -->
         <Grid Grid.Row="1">

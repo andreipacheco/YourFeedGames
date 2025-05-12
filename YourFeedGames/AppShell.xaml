@@ -13,9 +13,13 @@
         Route="MainPage" />
 
     <ShellContent
+        Title="Hot News"
+        ContentTemplate="{DataTemplate local:HotNewsPage}"
+        Route="HotNewsPage" />
+
+    <ShellContent
         Title="Configurações"
         ContentTemplate="{DataTemplate local:SettingsPage}"
         Route="SettingsPage" />
-
 </Shell>
 
