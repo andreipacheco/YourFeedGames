@@ -866,144 +866,116 @@ namespace YourFeedGames
         {
             Console.WriteLine("Tentando analisar Gameplayscassi com nova abordagem...");
 
-            // Baseado na análise do HTML, o problema pode ser que o conteúdo está sendo carregado via JavaScript
-            // Vamos tentar extrair quaisquer links com características de notícias
-            var allLinks = htmlDoc.DocumentNode.SelectNodes("//a[@href]");
-            var newsLinks = new List<HtmlNode>();
+            // Primeiro, tentamos extrair notícias da estrutura do site
+            var newsNodes = htmlDoc.DocumentNode.SelectNodes("//article[contains(@class, 'post')]") ??
+                           htmlDoc.DocumentNode.SelectNodes("//div[contains(@class, 'post')]");
 
-            if (allLinks != null)
+            if (newsNodes != null && newsNodes.Any())
             {
-                // Regex para URLs que parecem ser de posts/artigos
-                var articlePattern = new Regex(@"/(20\d{2}/\d{2}/|post/|noticia/|review/|artigo/)", RegexOptions.IgnoreCase);
+                Console.WriteLine($"Encontrados {newsNodes.Count} artigos de notícias");
 
-                foreach (var link in allLinks)
+                foreach (var node in newsNodes.Take(10))
                 {
-                    var href = link.GetAttributeValue("href", "");
+                    var linkNode = node.SelectSingleNode(".//h2/a") ??
+                                 node.SelectSingleNode(".//h3/a") ??
+                                 node.SelectSingleNode(".//a[contains(@class, 'post-title')]");
 
-                    // Verificar se parece ser um link de artigo
-                    if (!string.IsNullOrEmpty(href) &&
-                        (articlePattern.IsMatch(href) ||
-                         href.Contains("gameplayscassi.com.br") && !href.Equals(portal.Url) && !href.Contains("category") && !href.Contains("tag")))
+                    if (linkNode != null)
                     {
-                        newsLinks.Add(link);
-                        Console.WriteLine($"Link potencial encontrado: {href}");
-                    }
-                }
-            }
+                        var url = linkNode.GetAttributeValue("href", "");
+                        var title = CleanHtml(linkNode.InnerText);
 
-            if (newsLinks.Any())
-            {
-                Console.WriteLine($"Encontrados {newsLinks.Count} possíveis links de notícias");
-
-                // Remover duplicatas baseado em URLs
-                var processedUrls = new HashSet<string>();
-
-                foreach (var node in newsLinks.Take(15)) // Pegamos mais para compensar possíveis duplicatas
-                {
-                    var url = node.GetAttributeValue("href", "");
-
-                    // Garantir que a URL seja absoluta
-                    if (!string.IsNullOrEmpty(url) && !url.StartsWith("http"))
-                        url = new Uri(new Uri(portal.Url), url).ToString();
-
-                    // Evitar duplicatas
-                    if (string.IsNullOrEmpty(url) || processedUrls.Contains(url))
-                        continue;
-
-                    processedUrls.Add(url);
-
-                    // Tentar extrair título do texto do link, ou de elementos internos como img alt ou spans
-                    string title = "";
-
-                    // Verificar se há texto direto no link
-                    var directText = CleanHtml(node.InnerText);
-                    if (!string.IsNullOrWhiteSpace(directText) && directText.Length > 5)
-                    {
-                        title = directText;
-                    }
-                    // Verificar se há uma imagem com alt
-                    else
-                    {
-                        var imgNode = node.SelectSingleNode(".//img");
-                        if (imgNode != null)
+                        if (!string.IsNullOrEmpty(url) && !string.IsNullOrEmpty(title))
                         {
-                            var alt = imgNode.GetAttributeValue("alt", "");
-                            if (!string.IsNullOrWhiteSpace(alt))
+                            Console.WriteLine($"Adicionando notícia: {title} - {url}");
+                            NewsFeed.Add(new NewsItem
                             {
-                                title = alt;
-                            }
+                                Title = title,
+                                Url = url,
+                                Source = portal.Name
+                            });
                         }
-                    }
-
-                    // Se ainda não temos título, extrair da URL
-                    if (string.IsNullOrWhiteSpace(title))
-                    {
-                        // Extrair última parte da URL e converter para título
-                        var urlParts = url.Split('/').Where(p => !string.IsNullOrWhiteSpace(p)).ToList();
-                        if (urlParts.Any())
-                        {
-                            var lastPart = WebUtility.UrlDecode(urlParts.Last().Replace("-", " "));
-                            title = CleanHtml(lastPart);
-                            // Primeira letra maiúscula
-                            if (!string.IsNullOrEmpty(title) && title.Length > 1)
-                            {
-                                title = char.ToUpper(title[0]) + title.Substring(1);
-                            }
-                        }
-                    }
-
-                    if (!string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(url) && processedUrls.Count <= 10)
-                    {
-                        Console.WriteLine($"Adicionando notícia: {title} - {url}");
-                        NewsFeed.Add(new NewsItem
-                        {
-                            Title = title,
-                            Url = url,
-                            Source = portal.Name
-                        });
                     }
                 }
             }
             else
             {
-                // Alternativa: tentar uma abordagem mais genérica usando divs que parecem ser cards de notícias
-                var possibleCards = htmlDoc.DocumentNode.SelectNodes("//div[contains(@class, 'card') or contains(@class, 'post') or contains(@class, 'noticia')]");
+                Console.WriteLine("Nenhum artigo encontrado, tentando abordagem alternativa via links...");
 
-                if (possibleCards != null && possibleCards.Any())
+                // Abordagem alternativa para extrair de links de notícias
+                var allLinks = htmlDoc.DocumentNode.SelectNodes("//a[@href]");
+                var newsLinks = new List<HtmlNode>();
+
+                if (allLinks != null)
                 {
-                    Console.WriteLine($"Tentando extrair das divs de cards: {possibleCards.Count} encontrados");
-
-                    foreach (var card in possibleCards.Take(10))
+                    foreach (var link in allLinks)
                     {
-                        var linkNode = card.SelectSingleNode(".//a");
-                        var titleNode = card.SelectSingleNode(".//h2") ?? card.SelectSingleNode(".//h3");
+                        var href = link.GetAttributeValue("href", "");
 
-                        if (linkNode != null && titleNode != null)
+                        // Filtra links que parecem ser de notícias
+                        if (!string.IsNullOrEmpty(href) &&
+                            href.Contains("/noticias/") &&
+                            href.Contains(portal.Url) &&
+                            !href.EndsWith("/noticias/"))
                         {
-                            var title = CleanHtml(titleNode.InnerText);
-                            var url = linkNode.GetAttributeValue("href", "");
+                            newsLinks.Add(link);
+                        }
+                    }
+                }
 
-                            // Garantir que a URL seja absoluta
-                            if (!string.IsNullOrEmpty(url) && !url.StartsWith("http"))
-                                url = new Uri(new Uri(portal.Url), url).ToString();
+                if (newsLinks.Any())
+                {
+                    Console.WriteLine($"Encontrados {newsLinks.Count} links de notícias");
 
-                            if (!string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(url))
+                    var processedUrls = new HashSet<string>();
+
+                    foreach (var node in newsLinks.Take(15))
+                    {
+                        var url = node.GetAttributeValue("href", "");
+
+                        if (string.IsNullOrEmpty(url) || processedUrls.Contains(url))
+                            continue;
+
+                        processedUrls.Add(url);
+
+                        // Extrai título da URL quando não está no texto do link
+                        string title = CleanHtml(node.InnerText);
+
+                        if (string.IsNullOrWhiteSpace(title) || title.All(char.IsDigit))
+                        {
+                            // Extrai o título da parte descritiva da URL
+                            var urlParts = url.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+                            var lastPart = urlParts.LastOrDefault(p => !string.IsNullOrEmpty(p) && !p.All(char.IsDigit));
+
+                            if (lastPart != null)
                             {
-                                NewsFeed.Add(new NewsItem
+                                title = WebUtility.UrlDecode(lastPart)
+                                    .Replace("-", " ")
+                                    .Trim();
+
+                                // Capitaliza a primeira letra
+                                if (title.Length > 0)
                                 {
-                                    Title = title,
-                                    Url = url,
-                                    Source = portal.Name
-                                });
+                                    title = char.ToUpper(title[0]) + title.Substring(1);
+                                }
                             }
+                        }
+
+                        if (!string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(url))
+                        {
+                            Console.WriteLine($"Adicionando notícia: {title} - {url}");
+                            NewsFeed.Add(new NewsItem
+                            {
+                                Title = title,
+                                Url = url,
+                                Source = portal.Name
+                            });
                         }
                     }
                 }
                 else
                 {
-                    Console.WriteLine($"Nenhum nó de notícia encontrado para {portal.Name} usando todas as abordagens");
-                    // Para debug, salvar o HTML em um arquivo
-                    Console.WriteLine("HTML recebido: " + htmlDoc.DocumentNode.OuterHtml.Length + " caracteres");
+                    Console.WriteLine("Nenhum link de notícia encontrado.");
                 }
             }
         }
