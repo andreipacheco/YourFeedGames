@@ -24,7 +24,7 @@
 		<ApplicationTitle>YourFeedGames</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.companyname.yourfeedgames</ApplicationId>
+		<ApplicationId>com.apachecorp.yourfeedgames</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
