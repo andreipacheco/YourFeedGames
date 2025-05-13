@@ -21,7 +21,8 @@ namespace YourFeedGames
                 new NewsPortal { Name = "IGN Brasil", Url = "https://br.ign.com/", IsEnabled = true },
                 new NewsPortal { Name = "Voxel", Url = "https://voxel.com.br", IsEnabled = Preferences.Get("Voxel", true) },
                 new NewsPortal { Name = "GameVicio", Url = "https://www.gamevicio.com", IsEnabled = Preferences.Get("GameVicio", true) },
-                new NewsPortal { Name = "TechTudo", Url = "https://www.techtudo.com.br/jogos/", IsEnabled = Preferences.Get("TechTudo", true) }
+                new NewsPortal { Name = "TechTudo", Url = "https://www.techtudo.com.br/jogos/", IsEnabled = Preferences.Get("TechTudo", true) },
+                new NewsPortal { Name = "Adrenaline", Url = "https://www.adrenaline.com.br/noticias/", IsEnabled = Preferences.Get("Adrenaline", true) }
             };
 
             SaveCommand = new Command(SaveSettings);

@@ -258,7 +258,8 @@ namespace YourFeedGames
                     new NewsPortal { Name = "IGN Brasil", Url = "https://br.ign.com", IsEnabled = Preferences.Get("IGN Brasil", true) },
                     new NewsPortal { Name = "Voxel", Url = "https://www.tecmundo.com.br/voxel", IsEnabled = Preferences.Get("Voxel", true) },
                     new NewsPortal { Name = "GameVicio", Url = "https://www.gamevicio.com", IsEnabled = Preferences.Get("GameVicio", true) },
-                    new NewsPortal { Name = "TechTudo", Url = "https://www.techtudo.com.br/jogos/", IsEnabled = Preferences.Get("TechTudo", true) }
+                    new NewsPortal { Name = "TechTudo", Url = "https://www.techtudo.com.br/jogos/", IsEnabled = Preferences.Get("TechTudo", true) },
+                    new NewsPortal { Name = "Adrenaline", Url = "https://www.adrenaline.com.br/noticias/", IsEnabled = Preferences.Get("Adrenaline", true) }
                 };
 
                 var activePortals = enabledPortals.Where(p => p.IsEnabled).ToList();
@@ -441,12 +442,13 @@ namespace YourFeedGames
                 feedScrollView.IsVisible = false;
 
                 var enabledPortals = new List<NewsPortal>
-        {
-            new NewsPortal { Name = "Flow Games", Url = "https://flowgames.gg", IsEnabled = Preferences.Get("Flow Games", true) },
-            new NewsPortal { Name = "Gameplayscassi", Url = "https://gameplayscassi.com.br", IsEnabled = Preferences.Get("Gameplayscassi", true) },
-            new NewsPortal { Name = "The Enemy", Url = "https://www.theenemy.com.br", IsEnabled = Preferences.Get("The Enemy", true) },
-            new NewsPortal { Name = "IGN Brasil", Url = "https://br.ign.com", IsEnabled = Preferences.Get("IGN Brasil", true) }
-        };
+                {
+                    new NewsPortal { Name = "Flow Games", Url = "https://flowgames.gg", IsEnabled = Preferences.Get("Flow Games", true) },
+                    new NewsPortal { Name = "Gameplayscassi", Url = "https://gameplayscassi.com.br", IsEnabled = Preferences.Get("Gameplayscassi", true) },
+                    new NewsPortal { Name = "The Enemy", Url = "https://www.theenemy.com.br", IsEnabled = Preferences.Get("The Enemy", true) },
+                    new NewsPortal { Name = "IGN Brasil", Url = "https://br.ign.com", IsEnabled = Preferences.Get("IGN Brasil", true) },
+                    new NewsPortal { Name = "Adrenaline", Url = "https://www.adrenaline.com.br/noticias/", IsEnabled = Preferences.Get("Adrenaline", true) }
+                };
 
                 foreach (var portal in enabledPortals.Where(p => p.IsEnabled))
                 {
@@ -564,6 +566,9 @@ namespace YourFeedGames
                     case "TechTudo":
                         ParseTechTudo(htmlDoc, portal);
                         break;
+                    case "Adrenaline":
+                        ParseAdrenaline(htmlDoc, portal);
+                        break;
                 }
             }
             catch (TaskCanceledException)
@@ -575,6 +580,155 @@ namespace YourFeedGames
             {
                 Console.WriteLine($"Erro HTTP: {ex.Message}");
                 throw;
+            }
+        }
+        private void ParseAdrenaline(HtmlDocument htmlDoc, NewsPortal portal)
+        {
+            try
+            {
+                Console.WriteLine("Tentando parsear Adrenaline...");
+                var processedUrls = new HashSet<string>();
+                int addedCount = 0;
+
+                // Tentativa 1: Notícias principais em formato de cards
+                var newsNodes = htmlDoc.DocumentNode.SelectNodes("//div[contains(@class, 'article-card')]") ??
+                                htmlDoc.DocumentNode.SelectNodes("//article");
+
+                if (newsNodes != null && newsNodes.Any())
+                {
+                    Console.WriteLine($"Encontrados {newsNodes.Count} nós de notícia no Adrenaline");
+
+                    foreach (var node in newsNodes)
+                    {
+                        if (addedCount >= 10) break;
+
+                        // Ampliar os seletores para capturar mais padrões de links e títulos
+                        var linkNode = node.SelectSingleNode(".//a[contains(@class, 'title')] | .//h2/a | .//h3/a | .//a[contains(@class, 'post-title')] | .//h2//a | .//h3//a | .//a[contains(@class, 'headline')]");
+
+                        // Se não encontrar com os seletores específicos, tente qualquer link dentro do card
+                        if (linkNode == null)
+                        {
+                            linkNode = node.SelectSingleNode(".//a[@href]");
+                        }
+
+                        if (linkNode != null)
+                        {
+                            var url = linkNode.GetAttributeValue("href", "").Trim();
+                            var title = CleanHtml(linkNode.InnerText).Trim();
+
+                            // Debug info
+                            Console.WriteLine($"URL Extraída: '{url}'");
+                            Console.WriteLine($"Título Extraído: '{title}'");
+
+                            // Garantir que a URL seja absoluta
+                            if (!string.IsNullOrEmpty(url))
+                            {
+                                if (!url.StartsWith("http"))
+                                {
+                                    url = new Uri(new Uri(portal.Url), url).ToString();
+                                }
+
+                                // Filtrar URLs inválidas
+                                if (url.Contains("#comments") || url.Contains("page=") || title.Length < 10)
+                                {
+                                    Console.WriteLine($"URL ignorada: {url}");
+                                    continue;
+                                }
+
+                                // Adicionar ao feed se não for duplicado
+                                if (!string.IsNullOrEmpty(title) && !processedUrls.Contains(url))
+                                {
+                                    NewsFeed.Add(new NewsItem
+                                    {
+                                        Title = title,
+                                        Url = url,
+                                        Source = portal.Name
+                                    });
+                                    processedUrls.Add(url);
+                                    addedCount++;
+                                    Console.WriteLine($"Adicionado: {title}");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Link não encontrado neste nó");
+                        }
+                    }
+                }
+
+                // Se não conseguiu extrair nenhuma notícia com a primeira abordagem
+                if (addedCount == 0)
+                {
+                    Console.WriteLine("Tentando abordagem alternativa para Adrenaline");
+
+                    // Buscar por links que contenham "/noticias/" ou "/artigos/" no href
+                    var allLinks = htmlDoc.DocumentNode.SelectNodes("//a[contains(@href, '/noticias/') or contains(@href, '/artigos/')]");
+
+                    if (allLinks != null && allLinks.Any())
+                    {
+                        Console.WriteLine($"Encontrados {allLinks.Count} links de notícias/artigos");
+
+                        foreach (var link in allLinks)
+                        {
+                            if (addedCount >= 10) break;
+
+                            var url = link.GetAttributeValue("href", "").Trim();
+                            var title = CleanHtml(link.InnerText).Trim();
+
+                            // Debug info
+                            Console.WriteLine($"URL Alt Extraída: '{url}'");
+                            Console.WriteLine($"Título Alt Extraído: '{title}'");
+
+                            // Filtrar links inválidos
+                            if (string.IsNullOrEmpty(url) ||
+                                url.Contains("#") ||
+                                url.Contains("page=") ||
+                                title.Length < 10)
+                            {
+                                continue;
+                            }
+
+                            // Garantir URL absoluta
+                            if (!url.StartsWith("http"))
+                            {
+                                url = new Uri(new Uri(portal.Url), url).ToString();
+                            }
+
+                            // Adicionar ao feed se não for duplicado
+                            if (!processedUrls.Contains(url))
+                            {
+                                NewsFeed.Add(new NewsItem
+                                {
+                                    Title = title,
+                                    Url = url,
+                                    Source = portal.Name
+                                });
+                                processedUrls.Add(url);
+                                addedCount++;
+                                Console.WriteLine($"Adicionado (alternativo): {title}");
+                            }
+                        }
+                    }
+                }
+
+                // Log final de status
+                if (addedCount > 0)
+                {
+                    Console.WriteLine($"Adicionadas {addedCount} notícias do Adrenaline ao feed");
+                }
+                else
+                {
+                    Console.WriteLine("Não foi possível extrair notícias do Adrenaline");
+
+                    // Tentativa final: Usar JSON estruturado se existir
+                    TryExtractArticlesFromStructuredData(htmlDoc, portal);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao parsear Adrenaline: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
             }
         }
 
