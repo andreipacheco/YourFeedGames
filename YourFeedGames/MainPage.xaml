@@ -28,6 +28,7 @@
                     Clicked="OnRefreshClicked"
                     WidthRequest="50"
                     HeightRequest="50"
+                    BackgroundColor="Silver"
                     HorizontalOptions="Center"
                     VerticalOptions="Center"
                     Margin="0,0,5,0" />
@@ -38,6 +39,7 @@
                     Clicked="OnHotNewsClicked"
                     WidthRequest="50"
                     HeightRequest="50"
+                    BackgroundColor="Silver"
                     HorizontalOptions="Center"
                     VerticalOptions="Center"
                     Margin="5,0,5,0" />
@@ -48,6 +50,7 @@
                     Clicked="OnSettingsClicked"
                     WidthRequest="50"
                     HeightRequest="50"
+                    BackgroundColor="Silver"
                     HorizontalOptions="Center"
                     VerticalOptions="Center"
                     Margin="5,0,0,0" />
@@ -88,13 +91,13 @@
             <!-- ScrollView com as notícias -->
             <ScrollView x:Name="feedScrollView">
                 <CollectionView ItemsSource="{Binding NewsFeed}" 
-                                EmptyView="Nenhuma notícia disponível no momento">
+                    EmptyView="Nenhuma notícia disponível no momento">
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
                             <Frame BorderColor="LightGray" 
                                    CornerRadius="10" 
                                    Margin="0,5,0,10" 
-                                   Padding="15">    
+                                   Padding="15">
                                 <Grid RowDefinitions="Auto,Auto,Auto,Auto" 
                                       RowSpacing="8">
                                     <!-- Título da notícia -->
@@ -111,7 +114,7 @@
                                            IsVisible="{Binding Description, Converter={StaticResource StringNotEmptyConverter}}"
                                            Margin="0,5,0,0"
                                            LineBreakMode="TailTruncation"
-                                           MaxLines="3"/>   
+                                           MaxLines="3"/>
 
                                     <!-- Fonte da notícia -->
                                     <StackLayout Grid.Row="2" Orientation="Horizontal" Spacing="5">
@@ -121,20 +124,32 @@
                                                FontAttributes="Bold"/>
                                         <Label Text="{Binding Source}" 
                                                FontSize="12" 
-                                               TextColor="Gray"/>   
+                                               TextColor="Gray"/>
                                     </StackLayout>
 
-                                    <!-- Botão "Ler mais" -->
-                                    <Button Grid.Row="3" 
-                                            Text="Ler mais" 
-                                            CommandParameter="{Binding Url}" 
-                                            Clicked="OnReadMoreClicked"
-                                            HorizontalOptions="End"
-                                            WidthRequest="100"
-                                            HeightRequest="40"
-                                            Margin="0,5,0,0"
-                                            BackgroundColor="#3498db"
-                                            TextColor="White"/> 
+                                    <!-- Botões "Ler mais" e "Compartilhar" -->
+                                    <StackLayout Grid.Row="3" 
+                                                 Orientation="Horizontal" 
+                                                 HorizontalOptions="End"
+                                                 Spacing="10">
+                                        <Button Text="Ler mais" 
+                                                CommandParameter="{Binding Url}" 
+                                                Clicked="OnReadMoreClicked"
+                                                WidthRequest="100"
+                                                HeightRequest="40"
+                                                Margin="0,5,0,0"
+                                                BackgroundColor="#3498db"
+                                                TextColor="White"/> 
+
+                                        <Button ImageSource="share_24dp.png"
+                                                CommandParameter="{Binding Url}" 
+                                                Clicked="OnShareClicked"
+                                                WidthRequest="40"
+                                                HeightRequest="40"
+                                                Margin="0,5,0,0"
+                                                BackgroundColor="#2ecc71"
+                                            />
+                                    </StackLayout>
                                 </Grid>
                             </Frame>
                         </DataTemplate>
@@ -145,11 +160,11 @@
 
         <!-- Barra de status inferior -->
         <Label x:Name="statusLabel"
-           Grid.Row="2"
-           Text=""
-           FontSize="12"
-           TextColor="Gray"
-           Margin="0,10,0,0"
-           HorizontalOptions="Center"/>
+               Grid.Row="2"
+               Text=""
+               FontSize="12"
+               TextColor="Gray"
+               Margin="0,10,0,0"
+               HorizontalOptions="Center"/>
     </Grid>
 </ContentPage>

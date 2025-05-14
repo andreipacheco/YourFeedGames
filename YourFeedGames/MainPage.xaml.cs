@@ -1403,7 +1403,6 @@ namespace YourFeedGames
             }
         }
 
-
         private string CleanHtml(string input)
         {
             if (string.IsNullOrEmpty(input))
@@ -1419,6 +1418,18 @@ namespace YourFeedGames
             var trimmed = Regex.Replace(decoded, @"\s+", " ").Trim();
 
             return trimmed;
+        }
+
+        private async void OnShareClicked(object sender, EventArgs e)
+        {
+            if (sender is Button button && button.CommandParameter is string url)
+            {
+                await Share.Default.RequestAsync(new ShareTextRequest
+                {
+                    Uri = url,
+                    Title = "Compartilhar notícia"
+                });
+            }
         }
     }
 }

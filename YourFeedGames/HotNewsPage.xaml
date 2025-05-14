@@ -25,18 +25,18 @@
 
             <!-- Notícia 2: Mafia Old Country -->
             <Label Text="Mafia: Old Country - Um Novo Capítulo!"
-                FontSize="24"
-                FontAttributes="Bold"
-                HorizontalOptions="Center" />
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center" />
 
             <Label Text="A 2K Games revelou o lançamento de Mafia: Old Country, um novo capítulo emocionante na icônica série Mafia. Prepare-se para uma jornada épica no submundo do crime!"
-                    FontSize="16"
-                    LineBreakMode="WordWrap" />
+                   FontSize="16"
+                   LineBreakMode="WordWrap" />
 
             <Button Text="Saiba mais no site da 2K"
-                     BackgroundColor="#e74c3c"
-                     TextColor="White"
-                     Clicked="On2KLinkClicked" />
+                    BackgroundColor="#e74c3c"
+                    TextColor="White"
+                    Clicked="On2KLinkClicked" />
         </StackLayout>
     </ScrollView>
 </ContentPage>
