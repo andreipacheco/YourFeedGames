@@ -1,8 +1,9 @@
 ﻿using HtmlAgilityPack;
 using System.Collections.ObjectModel;
-using System.Text.RegularExpressions;
+using System.Diagnostics;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace YourFeedGames
 {
@@ -259,7 +260,9 @@ namespace YourFeedGames
                     new NewsPortal { Name = "Voxel", Url = "https://www.tecmundo.com.br/voxel", IsEnabled = Preferences.Get("Voxel", true) },
                     new NewsPortal { Name = "GameVicio", Url = "https://www.gamevicio.com", IsEnabled = Preferences.Get("GameVicio", true) },
                     new NewsPortal { Name = "TechTudo", Url = "https://www.techtudo.com.br/jogos/", IsEnabled = Preferences.Get("TechTudo", true) },
-                    new NewsPortal { Name = "Adrenaline", Url = "https://www.adrenaline.com.br/noticias/", IsEnabled = Preferences.Get("Adrenaline", true) }
+                    new NewsPortal { Name = "Adrenaline", Url = "https://www.adrenaline.com.br/noticias/", IsEnabled = Preferences.Get("Adrenaline", true) },
+                    new NewsPortal { Name = "Combo Infinito", Url = "https://www.comboinfinito.com.br/principal/", IsEnabled = Preferences.Get("Combo Infinito", true) },
+                    new NewsPortal { Name = "Arkade", Url = "https://arkade.com.br/", IsEnabled = Preferences.Get("Arkade", true) }
                 };
 
                 var activePortals = enabledPortals.Where(p => p.IsEnabled).ToList();
@@ -569,6 +572,12 @@ namespace YourFeedGames
                     case "Adrenaline":
                         ParseAdrenaline(htmlDoc, portal);
                         break;
+                    case "Combo Infinito":
+                        ParseComboInfinito(htmlDoc, portal);
+                        break;
+                    case "Arkade":
+                        ParseArkade(htmlDoc, portal);
+                        break;
                 }
             }
             catch (TaskCanceledException)
@@ -580,6 +589,381 @@ namespace YourFeedGames
             {
                 Console.WriteLine($"Erro HTTP: {ex.Message}");
                 throw;
+            }
+        }
+
+        private void ParseArkade(HtmlDocument htmlDoc, NewsPortal portal)
+        {
+            try
+            {
+                Console.WriteLine("Tentando parsear Arkade...");
+
+                // Exibir algumas informações sobre o documento HTML para diagnóstico
+                Console.WriteLine($"URL do Portal: {portal.Url}");
+                Console.WriteLine($"Título da página: {htmlDoc.DocumentNode.SelectSingleNode("//title")?.InnerText}");
+
+                // Tentativa 1: Artigos no formato de cards ou posts de destaque
+                var newsNodes = htmlDoc.DocumentNode.SelectNodes("//article");
+
+                // Tentativa 2: Se não encontrar artigos, tentar divs de posts
+                if (newsNodes == null || !newsNodes.Any())
+                {
+                    newsNodes = htmlDoc.DocumentNode.SelectNodes("//div[contains(@class, 'post') or contains(@class, 'card') or contains(@class, 'article')]");
+                }
+
+                if (newsNodes != null && newsNodes.Any())
+                {
+                    Console.WriteLine($"Encontrados {newsNodes.Count} nós de notícia no Arkade");
+
+                    // Vamos examinar detalhadamente o primeiro nó
+                    var firstNode = newsNodes.FirstOrDefault();
+                    if (firstNode != null)
+                    {
+                        Console.WriteLine("Estrutura do primeiro nó:");
+                        Console.WriteLine($"HTML parcial do nó: {firstNode.OuterHtml.Substring(0, Math.Min(500, firstNode.OuterHtml.Length))}...");
+
+                        // Examinar todos os links
+                        var allLinks = firstNode.SelectNodes(".//a");
+                        Console.WriteLine($"Links encontrados no primeiro nó: {(allLinks?.Count ?? 0)}");
+                        if (allLinks != null)
+                        {
+                            foreach (var link in allLinks.Take(3))
+                            {
+                                Console.WriteLine($"Link: {link.GetAttributeValue("href", "")} - Texto: {link.InnerText.Trim()}");
+                            }
+                        }
+
+                        // Verificar headings
+                        var headings = firstNode.SelectNodes(".//*[self::h1 or self::h2 or self::h3 or self::h4]");
+                        Console.WriteLine($"Headings encontrados no primeiro nó: {(headings?.Count ?? 0)}");
+                        if (headings != null)
+                        {
+                            foreach (var heading in headings)
+                            {
+                                Console.WriteLine($"Heading: {heading.Name} - Texto: {heading.InnerText.Trim()}");
+                            }
+                        }
+
+                        // Verificar imagens
+                        var images = firstNode.SelectNodes(".//img");
+                        Console.WriteLine($"Imagens encontradas no primeiro nó: {(images?.Count ?? 0)}");
+                        if (images != null)
+                        {
+                            foreach (var img in images.Take(2))
+                            {
+                                Console.WriteLine($"Imagem: {img.GetAttributeValue("src", "")}");
+                                Console.WriteLine($"  Alt: {img.GetAttributeValue("alt", "")}");
+                                Console.WriteLine($"  Data-src: {img.GetAttributeValue("data-src", "")}");
+                            }
+                        }
+                    }
+
+                    var processedUrls = new HashSet<string>();
+                    int addedCount = 0;
+
+                    foreach (var node in newsNodes.Take(10))
+                    {
+                        try
+                        {
+                            // Estratégias para encontrar título e URL
+                            string title = null;
+                            string url = null;
+                            string imageUrl = null;
+
+                            // Estratégia 1: Heading com link
+                            var headingLink = node.SelectSingleNode(".//*[self::h1 or self::h2 or self::h3 or self::h4]//a");
+                            if (headingLink != null)
+                            {
+                                title = headingLink.InnerText.Trim();
+                                url = headingLink.GetAttributeValue("href", "");
+                                Console.WriteLine($"Título encontrado em heading: {title}");
+                            }
+
+                            // Estratégia 2: Link com classe específica de título
+                            if (string.IsNullOrEmpty(title))
+                            {
+                                var titleLink = node.SelectSingleNode(".//a[contains(@class, 'title') or contains(@class, 'heading') or contains(@class, 'post-title')]");
+                                if (titleLink != null)
+                                {
+                                    title = titleLink.InnerText.Trim();
+                                    url = titleLink.GetAttributeValue("href", "");
+                                    Console.WriteLine($"Título encontrado por classe: {title}");
+                                }
+                            }
+
+                            // Estratégia 3: Qualquer link relevante na estrutura
+                            if (string.IsNullOrEmpty(title))
+                            {
+                                var links = node.SelectNodes(".//a");
+                                if (links != null)
+                                {
+                                    foreach (var link in links)
+                                    {
+                                        var linkText = link.InnerText.Trim();
+                                        if (linkText.Length > 15 && linkText.Length < 150) // Critério para parecer um título
+                                        {
+                                            title = linkText;
+                                            url = link.GetAttributeValue("href", "");
+                                            Console.WriteLine($"Título encontrado por tamanho: {title}");
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Estratégias para encontrar imagem
+
+                            // Estratégia 1: Imagem dentro do nó
+                            var imgNode = node.SelectSingleNode(".//img");
+                            if (imgNode != null)
+                            {
+                                // Tentar vários atributos para a imagem
+                                imageUrl = imgNode.GetAttributeValue("src", "");
+                                if (string.IsNullOrEmpty(imageUrl) || imageUrl.Contains("placeholder") || imageUrl.Contains("blank.gif"))
+                                {
+                                    imageUrl = imgNode.GetAttributeValue("data-src", "");
+                                }
+                                if (string.IsNullOrEmpty(imageUrl) || imageUrl.Contains("placeholder") || imageUrl.Contains("blank.gif"))
+                                {
+                                    imageUrl = imgNode.GetAttributeValue("data-lazy-src", "");
+                                }
+
+                                Console.WriteLine($"Imagem encontrada: {imageUrl}");
+                            }
+
+                            // Estratégia 2: Elemento de background com URL de imagem
+                            if (string.IsNullOrEmpty(imageUrl))
+                            {
+                                var elemWithBg = node.SelectSingleNode(".//*[@style[contains(., 'background')]]");
+                                if (elemWithBg != null)
+                                {
+                                    var style = elemWithBg.GetAttributeValue("style", "");
+                                    var match = Regex.Match(style, @"url\(['""](.*?)['""]\)");
+                                    if (match.Success)
+                                    {
+                                        imageUrl = match.Groups[1].Value;
+                                        Console.WriteLine($"Imagem encontrada em background: {imageUrl}");
+                                    }
+                                }
+                            }
+
+                            // Garantir que a URL seja absoluta
+                            if (!string.IsNullOrEmpty(url) && !url.StartsWith("http"))
+                            {
+                                url = new Uri(new Uri(portal.Url), url).ToString();
+                                Console.WriteLine($"URL convertida para absoluta: {url}");
+                            }
+
+                            if (!string.IsNullOrEmpty(imageUrl) && !imageUrl.StartsWith("http"))
+                            {
+                                imageUrl = new Uri(new Uri(portal.Url), imageUrl).ToString();
+                                Console.WriteLine($"URL de imagem convertida para absoluta: {imageUrl}");
+                            }
+
+                            // Adicionar notícia ao feed
+                            if (!string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(url) && !processedUrls.Contains(url))
+                            {
+                                NewsFeed.Add(new NewsItem
+                                {
+                                    Title = title,
+                                    Url = url,
+                                    Source = portal.Name,
+                                    ImageUrl = imageUrl
+                                });
+                                processedUrls.Add(url);
+                                addedCount++;
+                                Console.WriteLine($"Notícia adicionada ao feed: {title}");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Notícia não adicionada: " +
+                                    (string.IsNullOrEmpty(title) ? "Título vazio" : "") +
+                                    (string.IsNullOrEmpty(url) ? " URL vazia" : "") +
+                                    (processedUrls.Contains(url) ? " URL duplicada" : ""));
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Erro ao processar nó individual do Arkade: {ex.Message}");
+                        }
+                    }
+
+                    Console.WriteLine($"Total de notícias do Arkade adicionadas ao feed: {addedCount}");
+                }
+                else
+                {
+                    Console.WriteLine("Nenhuma notícia encontrada no Arkade");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao parsear Arkade: {ex.Message}");
+            }
+        }
+        private void ParseComboInfinito(HtmlDocument htmlDoc, NewsPortal portal)
+        {
+            try
+            {
+                Console.WriteLine("Tentando parsear Combo Infinito...");
+
+                // Exibir algumas informações sobre o documento HTML para diagnóstico
+                Console.WriteLine($"URL do Portal: {portal.Url}");
+                Console.WriteLine($"Título da página: {htmlDoc.DocumentNode.SelectSingleNode("//title")?.InnerText}");
+
+                // Selecionar os nós das notícias do Combo Infinito
+                var newsNodes = htmlDoc.DocumentNode.SelectNodes("//article[contains(@class, 'post')]");
+                if (newsNodes != null && newsNodes.Any())
+                {
+                    Console.WriteLine($"Encontrados {newsNodes.Count} nós de notícia no Combo Infinito");
+
+                    // Vamos examinar detalhadamente os primeiros nós
+                    var firstNode = newsNodes.FirstOrDefault();
+                    if (firstNode != null)
+                    {
+                        Console.WriteLine("Estrutura do primeiro nó:");
+                        Console.WriteLine($"HTML completo do nó: {firstNode.OuterHtml.Substring(0, Math.Min(500, firstNode.OuterHtml.Length))}...");
+
+                        // Examinar todos os elementos a em busca de títulos
+                        var allLinks = firstNode.SelectNodes(".//a");
+                        Console.WriteLine($"Links encontrados no primeiro nó: {(allLinks?.Count ?? 0)}");
+                        if (allLinks != null)
+                        {
+                            foreach (var link in allLinks.Take(5))
+                            {
+                                Console.WriteLine($"Link encontrado: {link.GetAttributeValue("href", "")} - Texto: {link.InnerText.Trim()}");
+                            }
+                        }
+
+                        // Verificar todos os elementos h2, h3, h4 que possam conter títulos
+                        var headings = firstNode.SelectNodes(".//*[self::h2 or self::h3 or self::h4]");
+                        Console.WriteLine($"Headings encontrados no primeiro nó: {(headings?.Count ?? 0)}");
+                        if (headings != null)
+                        {
+                            foreach (var heading in headings)
+                            {
+                                Console.WriteLine($"Heading encontrado: {heading.Name} - Texto: {heading.InnerText.Trim()}");
+                                var headingLink = heading.SelectSingleNode(".//a");
+                                if (headingLink != null)
+                                {
+                                    Console.WriteLine($"  - Link no heading: {headingLink.GetAttributeValue("href", "")}");
+                                }
+                            }
+                        }
+                    }
+
+                    // Tentar identificar padrões nos primeiros 10 nós
+                    var processedUrls = new HashSet<string>();
+                    int addedCount = 0;
+
+                    foreach (var node in newsNodes.Take(10))
+                    {
+                        try
+                        {
+                            // Tentar diferentes seletores para encontrar o título e URL
+                            string title = null;
+                            string url = null;
+
+                            // Tentativa 1: Links diretos com classe que indica que são títulos
+                            var titleLink = node.SelectSingleNode(".//a[contains(@class, 'title') or contains(@class, 'heading') or contains(@class, 'post-title')]");
+                            if (titleLink != null)
+                            {
+                                title = titleLink.InnerText.Trim();
+                                url = titleLink.GetAttributeValue("href", "");
+                                Console.WriteLine($"Encontrado por classe de link: {title}");
+                            }
+
+                            // Tentativa 2: Qualquer heading (h1-h4) que contenha um link
+                            if (string.IsNullOrEmpty(title))
+                            {
+                                var headingWithLink = node.SelectSingleNode(".//*[self::h1 or self::h2 or self::h3 or self::h4]//a");
+                                if (headingWithLink != null)
+                                {
+                                    title = headingWithLink.InnerText.Trim();
+                                    url = headingWithLink.GetAttributeValue("href", "");
+                                    Console.WriteLine($"Encontrado por heading com link: {title}");
+                                }
+                            }
+
+                            // Tentativa 3: Qualquer link que pareça ser o título principal do artigo
+                            if (string.IsNullOrEmpty(title))
+                            {
+                                // Pegar o primeiro link grande o suficiente para ser um título
+                                var links = node.SelectNodes(".//a");
+                                if (links != null)
+                                {
+                                    foreach (var link in links)
+                                    {
+                                        var linkText = link.InnerText.Trim();
+                                        if (linkText.Length > 10 && linkText.Length < 150) // Parece um título razoável
+                                        {
+                                            title = linkText;
+                                            url = link.GetAttributeValue("href", "");
+                                            Console.WriteLine($"Encontrado por tamanho de texto: {title}");
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Extrair imagem - tentar diferentes padrões
+                            var imgNode = node.SelectSingleNode(".//img");
+                            var imageUrl = "";
+
+                            if (imgNode != null)
+                            {
+                                imageUrl = imgNode.GetAttributeValue("src", "");
+                                if (string.IsNullOrEmpty(imageUrl))
+                                {
+                                    imageUrl = imgNode.GetAttributeValue("data-src", "");
+                                }
+                                if (string.IsNullOrEmpty(imageUrl))
+                                {
+                                    imageUrl = imgNode.GetAttributeValue("data-lazy-src", "");
+                                }
+                            }
+
+                            // Garantir que a URL seja absoluta
+                            if (!string.IsNullOrEmpty(url) && !url.StartsWith("http"))
+                            {
+                                url = new Uri(new Uri(portal.Url), url).ToString();
+                            }
+
+                            if (!string.IsNullOrEmpty(imageUrl) && !imageUrl.StartsWith("http"))
+                            {
+                                imageUrl = new Uri(new Uri(portal.Url), imageUrl).ToString();
+                            }
+
+                            // Adicionar notícia ao feed
+                            if (!string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(url) && !processedUrls.Contains(url))
+                            {
+                                NewsFeed.Add(new NewsItem
+                                {
+                                    Title = title,
+                                    Url = url,
+                                    Source = portal.Name,
+                                    ImageUrl = imageUrl
+                                });
+                                processedUrls.Add(url);
+                                addedCount++;
+                                Console.WriteLine($"Notícia adicionada ao feed: {title}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Erro ao processar nó individual do Combo Infinito: {ex.Message}");
+                        }
+                    }
+
+                    Console.WriteLine($"Total de notícias do Combo Infinito adicionadas ao feed: {addedCount}");
+                }
+                else
+                {
+                    Console.WriteLine("Nenhuma notícia encontrada no Combo Infinito");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao parsear Combo Infinito: {ex.Message}");
             }
         }
         private void ParseAdrenaline(HtmlDocument htmlDoc, NewsPortal portal)
