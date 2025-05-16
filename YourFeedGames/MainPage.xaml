@@ -28,18 +28,18 @@
                     Clicked="OnRefreshClicked"
                     WidthRequest="50"
                     HeightRequest="50"
-                    BackgroundColor="Silver"
+                    BackgroundColor="Orange"
                     HorizontalOptions="Center"
                     VerticalOptions="Center"
                     Margin="0,0,5,0" />
 
             <!-- Botão de Hot News -->
             <Button Grid.Column="2"
-                    ImageSource="mode_heat_red_24dp.png"
+                    ImageSource="mode_heat_24dp.png"
                     Clicked="OnHotNewsClicked"
                     WidthRequest="50"
                     HeightRequest="50"
-                    BackgroundColor="Silver"
+                    BackgroundColor="Red"
                     HorizontalOptions="Center"
                     VerticalOptions="Center"
                     Margin="5,0,5,0" />
@@ -50,7 +50,7 @@
                     Clicked="OnSettingsClicked"
                     WidthRequest="50"
                     HeightRequest="50"
-                    BackgroundColor="Silver"
+                    BackgroundColor="CornflowerBlue"
                     HorizontalOptions="Center"
                     VerticalOptions="Center"
                     Margin="5,0,0,0" />
