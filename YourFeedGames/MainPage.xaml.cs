@@ -10,10 +10,13 @@ namespace YourFeedGames
     public partial class MainPage : ContentPage
     {
         public ObservableCollection<NewsItem> NewsFeed { get; set; }
+        public ObservableCollection<string> ActivePortals { get; set; }
         private HttpClient _httpClient;
         private bool _debugMode = false;
         private CancellationTokenSource _loadingCts;
         private DateTime _loadingStartTime;
+
+
 
         public MainPage()
         {
@@ -292,6 +295,17 @@ namespace YourFeedGames
                         completedPortals++;
                         await UpdateLoadingProgress(completedPortals, totalPortals);
                         await UpdateStatus($"{completedPortals} de {totalPortals} portais carregados");
+
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            ActivePortals = new ObservableCollection<string> { "Todos" };
+                            foreach (var portal in activePortals)
+                            {
+                                ActivePortals.Add(portal.Name);
+                            }
+                            portalPicker.ItemsSource = ActivePortals;
+                            portalPicker.SelectedIndex = 0; // Inicializa com "Todos"
+                        });
                     }
                     catch (OperationCanceledException)
                     {
@@ -405,6 +419,25 @@ namespace YourFeedGames
         private async void OnHotNewsClicked(object sender, EventArgs e)
         {
             await Shell.Current.GoToAsync("///HotNewsPage");
+        }
+
+        private void OnPortalSelected(object sender, EventArgs e)
+        {
+            string selectedPortal = portalPicker.SelectedItem?.ToString();
+
+            if (selectedPortal == "Todos" || string.IsNullOrEmpty(selectedPortal))
+            {
+                newsCollectionView.ItemsSource = NewsFeed;
+            }
+            else
+            {
+                var filteredNews = new ObservableCollection<NewsItem>(
+                    NewsFeed.Where(news => news.Source == selectedPortal)
+                );
+                newsCollectionView.ItemsSource = filteredNews;
+            }
+
+            statusLabel.Text = $"Filtrando por: {selectedPortal}";
         }
 
         private async void OnReadMoreClicked(object sender, EventArgs e)
