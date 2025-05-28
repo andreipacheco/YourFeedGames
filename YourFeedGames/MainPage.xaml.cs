@@ -14,7 +14,8 @@ namespace YourFeedGames
         private bool _debugMode = false;
         private CancellationTokenSource _loadingCts;
         private DateTime _loadingStartTime;
-
+        private List<NewsPortal> _activePortals;
+        public ObservableCollection<NewsItem> AllNewsFeed { get; set; } = new();
         public MainPage()
         {
             InitializeComponent();
@@ -82,29 +83,23 @@ namespace YourFeedGames
             _httpClient.DefaultRequestHeaders.Add("Cache-Control", "max-age=0");
         }
 
-        // Método para tentar extrair artigos usando abordagens diferentes dependendo do site
-        private async Task<string> GetHtmlContentWithFallbacks(string url)
+        private void OnPortalPickerSelectedIndexChanged(object sender, EventArgs e)
         {
-            int retryCount = 0;
-            while (retryCount < 3)
+            if (portalPicker.SelectedIndex == -1)
             {
-                try
-                {
-                    using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
-                    {
-                        var response = await _httpClient.GetAsync(url, cts.Token);
-                        response.EnsureSuccessStatusCode();
-                        return await response.Content.ReadAsStringAsync();
-                    }
-                }
-                catch (Exception ex) when (retryCount < 2)
-                {
-                    retryCount++;
-                    Console.WriteLine($"Tentativa {retryCount} falhou para {url}. Erro: {ex.Message}");
-                    await Task.Delay(1000 * retryCount); // Espera progressiva
-                }
+                // Nenhum portal selecionado, pode exibir todos ou nenhum, conforme desejado
+                NewsFeed.Clear();
+                foreach (var item in AllNewsFeed)
+                    NewsFeed.Add(item);
+                return;
             }
-            throw new HttpRequestException($"Não foi possível obter conteúdo de {url} após 3 tentativas");
+
+            if (portalPicker.SelectedItem is string selectedPortal)
+            {
+                NewsFeed.Clear();
+                foreach (var item in AllNewsFeed.Where(n => n.Source == selectedPortal))
+                    NewsFeed.Add(item);
+            }
         }
 
         // Método para extrair artigos de scripts de dados estruturados (JSON)
@@ -269,6 +264,8 @@ namespace YourFeedGames
                 int totalPortals = activePortals.Count;
                 int completedPortals = 0;
 
+                _activePortals = activePortals;
+
                 // Atualiza o status inicial
                 await UpdateStatus($"Carregando {totalPortals} fontes de notícias...");
                 await UpdateLoadingProgress(0, totalPortals);
@@ -332,6 +329,11 @@ namespace YourFeedGames
                     {
                         NewsFeed.Add(item);
                     }
+
+                    // Atualize AllNewsFeed para o filtro funcionar
+                    AllNewsFeed.Clear();
+                    foreach (var item in NewsFeed)
+                        AllNewsFeed.Add(item);
                 });
             }
             catch (OperationCanceledException)
@@ -356,11 +358,22 @@ namespace YourFeedGames
                     {
                         statusLabel.Text = "Nenhuma notícia foi carregada. Verifique sua conexão.";
                     }
+
+                    PopulatePortalPicker();
                 });
 
                 _loadingCts?.Dispose();
                 _loadingCts = null;
             }
+        }
+
+        private void PopulatePortalPicker()
+        {
+            var items = new List<string>();
+            if (_activePortals != null)
+                items.AddRange(_activePortals.Select(p => p.Name));
+            portalPicker.ItemsSource = items;
+            portalPicker.SelectedIndex = -1; // Nenhum selecionado
         }
 
         // Métodos auxiliares para atualizar a UI
@@ -418,103 +431,17 @@ namespace YourFeedGames
             }
         }
 
-        // Add this method to your MainPage class to help with debugging
         private async void OnRefreshClicked(object sender, EventArgs e)
         {
-            // Cancela qualquer carregamento em andamento
             _loadingCts?.Cancel();
-
-            // Pequeno delay para garantir que o cancelamento foi processado
             await Task.Delay(100);
 
-            // Inicia um novo carregamento
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                portalPicker.SelectedIndex = -1; // Remove seleção
+            });
+
             await LoadNewsFeed();
-        }
-
-
-        // Enhanced version of LoadNewsFeed with better debugging
-        private async Task LoadNewsFeedWithDebug()
-        {
-            try
-            {
-                // Limpar feed atual antes de carregar novos itens
-                NewsFeed.Clear();
-
-                // Exibir indicador de carregamento
-                loadingIndicator.IsVisible = true;
-                feedScrollView.IsVisible = false;
-
-                var enabledPortals = new List<NewsPortal>
-                {
-                    new NewsPortal { Name = "Flow Games", Url = "https://flowgames.gg", IsEnabled = Preferences.Get("Flow Games", true) },
-                    new NewsPortal { Name = "Gameplayscassi", Url = "https://gameplayscassi.com.br", IsEnabled = Preferences.Get("Gameplayscassi", true) },
-                    new NewsPortal { Name = "The Enemy", Url = "https://www.theenemy.com.br", IsEnabled = Preferences.Get("The Enemy", true) },
-                    new NewsPortal { Name = "IGN Brasil", Url = "https://br.ign.com", IsEnabled = Preferences.Get("IGN Brasil", true) },
-                    new NewsPortal { Name = "Adrenaline", Url = "https://www.adrenaline.com.br/noticias/", IsEnabled = Preferences.Get("Adrenaline", true) }
-                };
-
-                foreach (var portal in enabledPortals.Where(p => p.IsEnabled))
-                {
-                    try
-                    {
-                        Console.WriteLine($"Tentando carregar notícias de {portal.Name}...");
-                        var startTime = DateTime.Now;
-
-                        // Adicione um contador para acompanhar quantas notícias foram adicionadas
-                        int itemsCountBefore = NewsFeed.Count;
-
-                        await FetchNewsFromPortal(portal);
-
-                        int itemsAdded = NewsFeed.Count - itemsCountBefore;
-                        var elapsed = DateTime.Now - startTime;
-
-                        Console.WriteLine($"Portal {portal.Name}: {itemsAdded} notícias carregadas em {elapsed.TotalSeconds:F2} segundos");
-
-                        if (itemsAdded == 0)
-                        {
-                            // Adicionar um item de notícia indicando que não encontrou nada
-                            NewsFeed.Add(new NewsItem
-                            {
-                                Title = $"Nenhuma notícia encontrada em {portal.Name}",
-                                Description = "Verifique a conexão com a internet ou o site pode ter alterado sua estrutura HTML.",
-                                Source = portal.Name,
-                                Url = portal.Url
-                            });
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Erro ao carregar notícias de {portal.Name}: {ex.Message}");
-                        Console.WriteLine($"StackTrace: {ex.StackTrace}");
-
-                        if (ex.InnerException != null)
-                        {
-                            Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
-                        }
-
-                        // Adicionar um item de notícia indicando erro
-                        NewsFeed.Add(new NewsItem
-                        {
-                            Title = $"Erro ao carregar notícias de {portal.Name}",
-                            Description = $"Erro: {ex.Message}",
-                            Source = portal.Name,
-                            Url = portal.Url
-                        });
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Erro geral: {ex.Message}");
-                Console.WriteLine($"StackTrace: {ex.StackTrace}");
-                await DisplayAlert("Erro", "Houve um problema ao carregar o feed de notícias.", "OK");
-            }
-            finally
-            {
-                // Ocultar indicador de carregamento
-                loadingIndicator.IsVisible = false;
-                feedScrollView.IsVisible = true;
-            }
         }
 
         // Melhorar o FetchNewsFromPortal para lidar com timeouts e erros HTTP

@@ -15,24 +15,29 @@
 
     <Grid RowDefinitions="Auto,*,Auto" Padding="10">
         <!-- Barra superior com título e botões -->
-        <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto,Auto" Margin="0,0,0,10">
+        <Grid Grid.Row="0"
+      RowDefinitions="Auto,Auto"
+      ColumnDefinitions="*,Auto,Auto,Auto"
+      Margin="0,0,0,10">
+
+            <!-- Primeira linha: Título e botões -->
             <!-- Título -->
-            <Label Grid.Column="0" 
-                   Text="Your Feed Games" 
-                   FontSize="Title" 
-                   FontAttributes="Bold" 
-                   VerticalOptions="Center" />
+            <Label Grid.Row="0" Grid.Column="0" 
+           Text="Your Feed Games" 
+           FontSize="Title" 
+           FontAttributes="Bold" 
+           VerticalOptions="Center" />
 
             <!-- Botão de Refresh -->
-            <Grid Grid.Column="1"
-                   HorizontalOptions="Center"
-                   VerticalOptions="Center">    
+            <Grid Grid.Row="0" Grid.Column="1"
+          HorizontalOptions="Center"
+          VerticalOptions="Center">
                 <skia:SKLottieView
-                        Source="refresh.json"
-                        RepeatCount="1"
-                        HeightRequest="50"
-                        WidthRequest="50"
-                        HorizontalOptions="Center">
+                Source="refresh.json"
+                RepeatCount="1"
+                HeightRequest="50"
+                WidthRequest="50"
+                HorizontalOptions="Center">
                     <skia:SKLottieView.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnRefreshClicked"/>
                     </skia:SKLottieView.GestureRecognizers>
@@ -40,15 +45,15 @@
             </Grid>
 
             <!-- Botão de Hot News -->
-            <Grid Grid.Column="2"
-                   HorizontalOptions="Center"
-                   VerticalOptions="Center">
+            <Grid Grid.Row="0" Grid.Column="2"
+          HorizontalOptions="Center"
+          VerticalOptions="Center">
                 <skia:SKLottieView
-                        Source="fire2.json"
-                        RepeatCount="-1"
-                        HeightRequest="50"
-                        WidthRequest="50"
-                        HorizontalOptions="Center">
+                Source="fire2.json"
+                RepeatCount="-1"
+                HeightRequest="50"
+                WidthRequest="50"
+                HorizontalOptions="Center">
                     <skia:SKLottieView.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnHotNewsClicked"/>
                     </skia:SKLottieView.GestureRecognizers>
@@ -56,20 +61,28 @@
             </Grid>
 
             <!-- Botão de Configurações -->
-            <Grid Grid.Column="3"
-                  HorizontalOptions="Center"
-                  VerticalOptions="Center">
+            <Grid Grid.Row="0" Grid.Column="3"
+          HorizontalOptions="Center"
+          VerticalOptions="Center">
                 <skia:SKLottieView
-                        Source="settings.json"
-                        RepeatCount="1"
-                        HeightRequest="50"
-                        WidthRequest="50"
-                        HorizontalOptions="Center">
+                Source="settings.json"
+                RepeatCount="1"
+                HeightRequest="50"
+                WidthRequest="50"
+                HorizontalOptions="Center">
                     <skia:SKLottieView.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnSettingsClicked"/>
                     </skia:SKLottieView.GestureRecognizers>
                 </skia:SKLottieView>
             </Grid>
+
+            <!-- Segunda linha: Picker -->
+            <Picker Grid.Row="1" Grid.ColumnSpan="4"
+            x:Name="portalPicker"
+            Title="Filtrar por portal"
+            SelectedIndexChanged="OnPortalPickerSelectedIndexChanged"
+            HorizontalOptions="FillAndExpand"
+            Margin="0,10,0,0" />
         </Grid>
 
         <!-- Conteúdo principal -->
