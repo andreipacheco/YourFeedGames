@@ -1182,67 +1182,53 @@ namespace YourFeedGames
             {
                 Console.WriteLine("Tentando parsear GameVicio...");
 
-                // Tentativa 1: Notícias em destaque (slide)
-                var featuredNews = htmlDoc.DocumentNode.SelectNodes("//div[contains(@class, 'slide-home-item-new')]//a[contains(@class, 'slide-home-img-new')]");
-
-                // Tentativa 2: Notícias na lista principal
-                var mainNews = htmlDoc.DocumentNode.SelectNodes("//div[contains(@class, 'nav-video-item')]//a[contains(@class, 'nv-item-title')]");
-
-                // Tentativa 3: Notícias em boxes
-                var boxNews = htmlDoc.DocumentNode.SelectNodes("//div[contains(@class, 'box-noticia-home')]//a[contains(@class, 'box-noticia-link')]");
-
-                var allNews = new List<HtmlNode>();
-                if (featuredNews != null) allNews.AddRange(featuredNews);
-                if (mainNews != null) allNews.AddRange(mainNews);
-                if (boxNews != null) allNews.AddRange(boxNews);
-
-                if (allNews.Any())
+                // Tente buscar por links de notícias de forma mais genérica
+                var newsLinks = htmlDoc.DocumentNode.SelectNodes("//a[contains(@href, '/noticia/') or contains(@href, '/noticias/')]");
+                if (newsLinks == null || !newsLinks.Any())
                 {
-                    Console.WriteLine($"Encontrados {allNews.Count} nós de notícia no GameVicio");
+                    Console.WriteLine("Nenhum link de notícia encontrado no GameVicio");
+                    TryExtractArticlesFromStructuredData(htmlDoc, portal);
+                    return;
+                }
 
-                    var processedUrls = new HashSet<string>();
-                    foreach (var node in allNews.Take(15)) // Pegar mais para filtrar duplicatas
+                var processedUrls = new HashSet<string>();
+                int addedCount = 0;
+
+                foreach (var node in newsLinks)
+                {
+                    if (addedCount >= 15) break;
+
+                    var url = node.GetAttributeValue("href", "");
+                    var title = node.GetAttributeValue("title", "");
+
+                    if (string.IsNullOrEmpty(title))
+                        title = CleanHtml(node.InnerText);
+
+                    if (!string.IsNullOrEmpty(url) && !url.StartsWith("http"))
+                        url = new Uri(new Uri(portal.Url), url).ToString();
+
+                    if (!string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(url) && !processedUrls.Contains(url))
                     {
-                        var url = node.GetAttributeValue("href", "");
-                        var title = node.GetAttributeValue("title", "");
-
-                        if (string.IsNullOrEmpty(title))
+                        NewsFeed.Add(new NewsItem
                         {
-                            title = CleanHtml(node.InnerText);
-                        }
-
-                        if (!string.IsNullOrEmpty(url) && !url.StartsWith("http"))
-                        {
-                            url = new Uri(new Uri(portal.Url), url).ToString();
-                        }
-
-                        if (!string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(url) && !processedUrls.Contains(url))
-                        {
-                            NewsFeed.Add(new NewsItem
-                            {
-                                Title = title,
-                                Url = url,
-                                Source = portal.Name
-                            });
-                            processedUrls.Add(url);
-                            Console.WriteLine($"Adicionado: {title}");
-                        }
+                            Title = title,
+                            Url = url,
+                            Source = portal.Name
+                        });
+                        processedUrls.Add(url);
+                        addedCount++;
+                        Console.WriteLine($"Adicionado: {title}");
                     }
                 }
-                else
-                {
-                    Console.WriteLine("Nenhuma notícia encontrada no GameVicio");
-                    // Tentar extrair de scripts JSON
-                    TryExtractArticlesFromStructuredData(htmlDoc, portal);
-                }
+
+                if (addedCount == 0)
+                    Console.WriteLine("Nenhuma notícia válida adicionada do GameVicio.");
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Erro ao parsear GameVicio: {ex.Message}");
             }
         }
-
-
         private void ParseIGNBrasil(HtmlDocument htmlDoc, NewsPortal portal)
         {
             var newsNodes = htmlDoc.DocumentNode.SelectNodes("//div[@class='item-title']/a") ??
