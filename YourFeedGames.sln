@@ -1,9 +1,8 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35931.197
+VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YourFeedGames", "YourFeedGames\YourFeedGames.csproj", "{C858BEB9-C012-4040-90D1-E1F2929009CC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YourFeedGames", "YourFeedGames\YourFeedGames.csproj", "{2A603FD1-D07C-9B33-CF46-5BF017FF1993}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,16 +10,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C858BEB9-C012-4040-90D1-E1F2929009CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C858BEB9-C012-4040-90D1-E1F2929009CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C858BEB9-C012-4040-90D1-E1F2929009CC}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{C858BEB9-C012-4040-90D1-E1F2929009CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C858BEB9-C012-4040-90D1-E1F2929009CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A603FD1-D07C-9B33-CF46-5BF017FF1993}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A603FD1-D07C-9B33-CF46-5BF017FF1993}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A603FD1-D07C-9B33-CF46-5BF017FF1993}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A603FD1-D07C-9B33-CF46-5BF017FF1993}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {33CB444E-D46C-4F0C-93B8-08B7F82F8AFB}
+		SolutionGuid = {9D2DF45E-A083-4EBE-BCB9-E8ABB5EE43A1}
 	EndGlobalSection
 EndGlobal

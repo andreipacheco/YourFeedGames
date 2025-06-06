@@ -3,20 +3,30 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="YourFeedGames.HotNewsPage"
              Title="Hot News">
-
     <ScrollView>
         <StackLayout Padding="10" Spacing="20">
+            <!-- Notícia 1: Nintendo Switch 2 -->
+            <Label Text="Nintendo Switch 2: Finalmente Revelado!"
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center" />
+            <Label Text="A Nintendo oficialmente revelou o Nintendo Switch 2! O novo console promete gráficos aprimorados, maior capacidade de armazenamento e retrocompatibilidade com jogos do Switch original. A revolução dos portáteis continua!"
+                   FontSize="16"
+                   LineBreakMode="WordWrap" />
+            <Button Text="Confira no site da Nintendo"
+                    BackgroundColor="#e60012"
+                    TextColor="White"
+                    Clicked="OnNintendoLinkClicked" />
+
             <!-- Título da notícia -->
             <Label Text="GTA VI: Data de Lançamento Confirmada!"
                    FontSize="24"
                    FontAttributes="Bold"
                    HorizontalOptions="Center" />
-
             <!-- Descrição da notícia -->
             <Label Text="A Rockstar Games anunciou oficialmente a data de lançamento do tão aguardado GTA VI. Prepare-se para explorar um mundo ainda mais imersivo e cheio de aventuras!"
                    FontSize="16"
                    LineBreakMode="WordWrap" />
-
             <!-- Link para o portal da Rockstar -->
             <Button Text="Saiba mais no site da Rockstar"
                     BackgroundColor="#3498db"
@@ -28,11 +38,9 @@
                    FontSize="24"
                    FontAttributes="Bold"
                    HorizontalOptions="Center" />
-
             <Label Text="A 2K Games revelou o lançamento de Mafia: Old Country, um novo capítulo emocionante na icônica série Mafia. Prepare-se para uma jornada épica no submundo do crime!"
                    FontSize="16"
                    LineBreakMode="WordWrap" />
-
             <Button Text="Saiba mais no site da 2K"
                     BackgroundColor="#e74c3c"
                     TextColor="White"

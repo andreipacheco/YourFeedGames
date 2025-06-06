@@ -9,6 +9,12 @@ namespace YourFeedGames
             InitializeComponent();
         }
 
+        private async void OnNintendoLinkClicked(object sender, EventArgs e)
+        {
+            var url = "https://www.nintendo.com/pt-br/gaming-systems/switch-2/";
+            await Launcher.OpenAsync(new Uri(url));
+        }
+
         private async void OnRockstarLinkClicked(object sender, EventArgs e)
         {
             var url = "https://www.rockstargames.com/";
