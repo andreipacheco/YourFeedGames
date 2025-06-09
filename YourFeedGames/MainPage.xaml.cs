@@ -248,15 +248,15 @@ namespace YourFeedGames
                 // Lista de portais habilitados
                 var enabledPortals = new List<NewsPortal>
                 {
-                    new NewsPortal { Name = "Flow Games", Url = "https://flowgames.gg", IsEnabled = Preferences.Get("Flow Games", true) },
+                    new NewsPortal { Name = "FlowGames", Url = "https://flowgames.gg", IsEnabled = Preferences.Get("FlowGames", true) },
                     new NewsPortal { Name = "Gameplayscassi", Url = "https://gameplayscassi.com.br", IsEnabled = Preferences.Get("Gameplayscassi", true) },
-                    new NewsPortal { Name = "The Enemy", Url = "https://www.theenemy.com.br", IsEnabled = Preferences.Get("The Enemy", true) },
-                    new NewsPortal { Name = "IGN Brasil", Url = "https://br.ign.com", IsEnabled = Preferences.Get("IGN Brasil", true) },
+                    new NewsPortal { Name = "TheEnemy", Url = "https://www.theenemy.com.br", IsEnabled = Preferences.Get("TheEnemy", true) },
+                    new NewsPortal { Name = "IGNBrasil", Url = "https://br.ign.com", IsEnabled = Preferences.Get("IGNBrasil", true) },
                     new NewsPortal { Name = "Voxel", Url = "https://www.tecmundo.com.br/voxel", IsEnabled = Preferences.Get("Voxel", true) },
                     new NewsPortal { Name = "GameVicio", Url = "https://www.gamevicio.com", IsEnabled = Preferences.Get("GameVicio", true) },
                     new NewsPortal { Name = "TechTudo", Url = "https://www.techtudo.com.br/jogos/", IsEnabled = Preferences.Get("TechTudo", true) },
                     new NewsPortal { Name = "Adrenaline", Url = "https://www.adrenaline.com.br/noticias/", IsEnabled = Preferences.Get("Adrenaline", true) },
-                    new NewsPortal { Name = "Combo Infinito", Url = "https://www.comboinfinito.com.br/principal/", IsEnabled = Preferences.Get("Combo Infinito", true) },
+                    new NewsPortal { Name = "ComboInfinito", Url = "https://www.comboinfinito.com.br/principal/", IsEnabled = Preferences.Get("ComboInfinito", true) },
                     new NewsPortal { Name = "Arkade", Url = "https://arkade.com.br/", IsEnabled = Preferences.Get("Arkade", true) }
                 };
 
@@ -475,16 +475,16 @@ namespace YourFeedGames
 
                 switch (portal.Name)
                 {
-                    case "Flow Games":
+                    case "FlowGames":
                         ParseFlowGames(htmlDoc, portal);
                         break;
                     case "Gameplayscassi":
                         ParseGameplayscassi(htmlDoc, portal);
                         break;
-                    case "The Enemy":
+                    case "TheEnemy":
                         ParseTheEnemy(htmlDoc, portal);
                         break;
-                    case "IGN Brasil":
+                    case "IGNBrasil":
                         ParseIGNBrasil(htmlDoc, portal);
                         break;
                     case "Voxel":
@@ -499,7 +499,7 @@ namespace YourFeedGames
                     case "Adrenaline":
                         ParseAdrenaline(htmlDoc, portal);
                         break;
-                    case "Combo Infinito":
+                    case "ComboInfinito":
                         ParseComboInfinito(htmlDoc, portal);
                         break;
                     case "Arkade":
