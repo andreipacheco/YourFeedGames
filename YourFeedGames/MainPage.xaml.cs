@@ -250,7 +250,7 @@ namespace YourFeedGames
                 {
                     new NewsPortal { Name = "FlowGames", Url = "https://flowgames.gg", IsEnabled = Preferences.Get("FlowGames", true) },
                     new NewsPortal { Name = "Gameplayscassi", Url = "https://gameplayscassi.com.br", IsEnabled = Preferences.Get("Gameplayscassi", true) },
-                    new NewsPortal { Name = "TheEnemy", Url = "https://www.theenemy.com.br", IsEnabled = Preferences.Get("TheEnemy", true) },
+                    new NewsPortal { Name = "OmeleteGames", Url = "https://www.omelete.com.br/games", IsEnabled = Preferences.Get("OmeleteGames", true) },
                     new NewsPortal { Name = "IGNBrasil", Url = "https://br.ign.com", IsEnabled = Preferences.Get("IGNBrasil", true) },
                     new NewsPortal { Name = "Voxel", Url = "https://www.tecmundo.com.br/voxel", IsEnabled = Preferences.Get("Voxel", true) },
                     new NewsPortal { Name = "GameVicio", Url = "https://www.gamevicio.com", IsEnabled = Preferences.Get("GameVicio", true) },
@@ -481,8 +481,8 @@ namespace YourFeedGames
                     case "Gameplayscassi":
                         ParseGameplayscassi(htmlDoc, portal);
                         break;
-                    case "TheEnemy":
-                        ParseTheEnemy(htmlDoc, portal);
+                    case "OmeleteGames":
+                        ParseOmeleteGames(htmlDoc, portal);
                         break;
                     case "IGNBrasil":
                         ParseIGNBrasil(htmlDoc, portal);
@@ -1431,210 +1431,459 @@ namespace YourFeedGames
             }
         }
 
-        private void ParseTheEnemy(HtmlDocument htmlDoc, NewsPortal portal)
+        //private void ParseTheEnemy(HtmlDocument htmlDoc, NewsPortal portal)
+        //{
+        //    Console.WriteLine("Tentando analisar The Enemy com nova abordagem...");
+
+        //    // O site TheEnemy provavelmente usa JavaScript para renderizar o conteúdo
+        //    // Vamos tentar uma abordagem diferente, buscando por links que parecem ser de artigos
+
+        //    // Opção 1: Buscar por scripts que contenham dados de artigos embutidos (JSON)
+        //    var scriptNodes = htmlDoc.DocumentNode.SelectNodes("//script");
+        //    var articlesFound = false;
+
+        //    if (scriptNodes != null)
+        //    {
+        //        Console.WriteLine($"Encontrados {scriptNodes.Count} scripts para análise");
+
+        //        foreach (var script in scriptNodes)
+        //        {
+        //            var scriptContent = script.InnerText;
+
+        //            // Procurar por padrões que pareçam conter URLs de artigos
+        //            if (scriptContent.Contains("\"url\":") &&
+        //                (scriptContent.Contains("\"title\":") || scriptContent.Contains("\"headline\":")))
+        //            {
+        //                try
+        //                {
+        //                    Console.WriteLine("Encontrado possível script com dados de artigos");
+
+        //                    // Extrair URLs e títulos usando regex
+        //                    var urlPattern = new Regex("\"url\":\\s*\"([^\"]+)\"", RegexOptions.IgnoreCase);
+        //                    var titlePattern = new Regex("\"(title|headline)\":\\s*\"([^\"]+)\"", RegexOptions.IgnoreCase);
+
+        //                    var urlMatches = urlPattern.Matches(scriptContent);
+        //                    var titleMatches = titlePattern.Matches(scriptContent);
+
+        //                    // Se encontramos algumas URLs e títulos, vamos tentar usá-los
+        //                    if (urlMatches.Count > 0 && titleMatches.Count > 0 &&
+        //                        urlMatches.Count == titleMatches.Count)
+        //                    {
+        //                        Console.WriteLine($"Extraídos {urlMatches.Count} pares de URL/título do script");
+
+        //                        for (int i = 0; i < Math.Min(10, urlMatches.Count); i++)
+        //                        {
+        //                            var url = urlMatches[i].Groups[1].Value;
+        //                            var title = WebUtility.HtmlDecode(titleMatches[i].Groups[2].Value);
+
+        //                            // Verificar se a URL é do próprio site e não é uma URL de imagem ou outro recurso
+        //                            if (url.Contains("theenemy.com.br") &&
+        //                                !url.EndsWith(".jpg") && !url.EndsWith(".png") &&
+        //                                !url.EndsWith(".css") && !url.EndsWith(".js"))
+        //                            {
+        //                                NewsFeed.Add(new NewsItem
+        //                                {
+        //                                    Title = title,
+        //                                    Url = url,
+        //                                    Source = portal.Name
+        //                                });
+        //                                articlesFound = true;
+        //                            }
+        //                        }
+        //                    }
+        //                }
+        //                catch (Exception ex)
+        //                {
+        //                    Console.WriteLine($"Erro ao processar script: {ex.Message}");
+        //                }
+        //            }
+        //        }
+        //    }
+
+        //    // Se não encontramos artigos nos scripts, tente a abordagem alternativa
+        //    if (!articlesFound)
+        //    {
+        //        // Buscar por links com características de artigos
+        //        var allLinks = htmlDoc.DocumentNode.SelectNodes("//a[@href]");
+
+        //        if (allLinks != null)
+        //        {
+        //            Console.WriteLine($"Analisando {allLinks.Count} links");
+
+        //            // Filtrar links que parecem ser de artigos
+        //            var articlePattern = new Regex(@"/(noticia|review|artigo|coluna|noticias)/", RegexOptions.IgnoreCase);
+        //            var newsLinks = new List<HtmlNode>();
+
+        //            foreach (var link in allLinks)
+        //            {
+        //                var href = link.GetAttributeValue("href", "");
+
+        //                // Verificar se parece ser um link de artigo
+        //                if (!string.IsNullOrEmpty(href) &&
+        //                    (articlePattern.IsMatch(href) ||
+        //                     href.Contains("theenemy.com.br") && !href.Equals(portal.Url) && !href.Contains("#") &&
+        //                     href.Split('/').Length > 4))
+        //                {
+        //                    newsLinks.Add(link);
+        //                }
+        //            }
+
+        //            // Processar os links encontrados
+        //            if (newsLinks.Any())
+        //            {
+        //                Console.WriteLine($"Encontrados {newsLinks.Count} possíveis links de artigos");
+
+        //                // Remover duplicatas baseado em URLs
+        //                var processedUrls = new HashSet<string>();
+
+        //                foreach (var node in newsLinks.Take(15)) // Pegamos mais para compensar possíveis duplicatas
+        //                {
+        //                    var title = CleanHtml(node.InnerText);
+        //                    var url = node.GetAttributeValue("href", "");
+
+        //                    // Garantir que a URL seja absoluta
+        //                    if (!string.IsNullOrEmpty(url) && !url.StartsWith("http"))
+        //                        url = new Uri(new Uri(portal.Url), url).ToString();
+
+        //                    // Evitar duplicatas
+        //                    if (string.IsNullOrEmpty(url) || processedUrls.Contains(url))
+        //                        continue;
+
+        //                    processedUrls.Add(url);
+
+        //                    // Se o texto do link estiver vazio, tentar extrair título de elementos filhos
+        //                    if (string.IsNullOrWhiteSpace(title))
+        //                    {
+        //                        var textNodes = node.SelectNodes(".//text()");
+        //                        if (textNodes != null && textNodes.Any())
+        //                        {
+        //                            title = CleanHtml(string.Join(" ", textNodes.Select(n => n.InnerText)));
+        //                        }
+        //                    }
+
+        //                    // Se ainda não temos título, extrair da URL
+        //                    if (string.IsNullOrWhiteSpace(title))
+        //                    {
+        //                        // Extrair última parte da URL e converter para título
+        //                        var urlParts = url.Split('/').Where(p => !string.IsNullOrWhiteSpace(p)).ToList();
+        //                        if (urlParts.Any())
+        //                        {
+        //                            var lastPart = WebUtility.UrlDecode(urlParts.Last().Replace("-", " "));
+        //                            title = CleanHtml(lastPart);
+        //                            // Primeira letra maiúscula
+        //                            if (!string.IsNullOrEmpty(title) && title.Length > 1)
+        //                            {
+        //                                title = char.ToUpper(title[0]) + title.Substring(1);
+        //                            }
+        //                        }
+        //                    }
+
+        //                    if (!string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(url) && processedUrls.Count <= 10)
+        //                    {
+        //                        NewsFeed.Add(new NewsItem
+        //                        {
+        //                            Title = title,
+        //                            Url = url,
+        //                            Source = portal.Name
+        //                        });
+        //                        articlesFound = true;
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+
+        //    // Se ainda não encontramos artigos, tente extrair da meta tags
+        //    if (!articlesFound)
+        //    {
+        //        Console.WriteLine("Tentando extrair artigos das meta tags...");
+
+        //        var metaTags = htmlDoc.DocumentNode.SelectNodes("//meta[@property='og:url' or @property='og:title']");
+        //        if (metaTags != null && metaTags.Count >= 2)
+        //        {
+        //            string url = null;
+        //            string title = null;
+
+        //            foreach (var meta in metaTags)
+        //            {
+        //                var property = meta.GetAttributeValue("property", "");
+        //                var content = meta.GetAttributeValue("content", "");
+
+        //                if (property == "og:url")
+        //                    url = content;
+        //                else if (property == "og:title")
+        //                    title = content;
+        //            }
+
+        //            if (!string.IsNullOrEmpty(url) && !string.IsNullOrEmpty(title))
+        //            {
+        //                // Adicionar a própria página como uma notícia (geralmente é a principal)
+        //                NewsFeed.Add(new NewsItem
+        //                {
+        //                    Title = title,
+        //                    Url = url,
+        //                    Source = portal.Name
+        //                });
+        //                articlesFound = true;
+        //            }
+        //        }
+        //    }
+
+        //    if (!articlesFound)
+        //    {
+        //        Console.WriteLine($"Nenhum artigo encontrado para {portal.Name} usando todas as estratégias");
+        //        // Para debug, salvar o HTML em um arquivo
+        //        Console.WriteLine("HTML recebido: " + htmlDoc.DocumentNode.OuterHtml.Length + " caracteres");
+        //    }
+        //}
+
+        private void ParseOmeleteGames(HtmlDocument htmlDoc, NewsPortal portal)
         {
-            Console.WriteLine("Tentando analisar The Enemy com nova abordagem...");
+            Console.WriteLine("Analisando Omelete Games...");
 
-            // O site TheEnemy provavelmente usa JavaScript para renderizar o conteúdo
-            // Vamos tentar uma abordagem diferente, buscando por links que parecem ser de artigos
-
-            // Opção 1: Buscar por scripts que contenham dados de artigos embutidos (JSON)
-            var scriptNodes = htmlDoc.DocumentNode.SelectNodes("//script");
-            var articlesFound = false;
-
-            if (scriptNodes != null)
+            try
             {
-                Console.WriteLine($"Encontrados {scriptNodes.Count} scripts para análise");
+                // O Omelete Games usa uma estrutura mais simples com links diretos
+                // Buscar por todos os links que apontam para artigos de games
+                var articleLinks = htmlDoc.DocumentNode.SelectNodes("//a[@href]");
 
-                foreach (var script in scriptNodes)
+                if (articleLinks == null)
                 {
-                    var scriptContent = script.InnerText;
-
-                    // Procurar por padrões que pareçam conter URLs de artigos
-                    if (scriptContent.Contains("\"url\":") &&
-                        (scriptContent.Contains("\"title\":") || scriptContent.Contains("\"headline\":")))
-                    {
-                        try
-                        {
-                            Console.WriteLine("Encontrado possível script com dados de artigos");
-
-                            // Extrair URLs e títulos usando regex
-                            var urlPattern = new Regex("\"url\":\\s*\"([^\"]+)\"", RegexOptions.IgnoreCase);
-                            var titlePattern = new Regex("\"(title|headline)\":\\s*\"([^\"]+)\"", RegexOptions.IgnoreCase);
-
-                            var urlMatches = urlPattern.Matches(scriptContent);
-                            var titleMatches = titlePattern.Matches(scriptContent);
-
-                            // Se encontramos algumas URLs e títulos, vamos tentar usá-los
-                            if (urlMatches.Count > 0 && titleMatches.Count > 0 &&
-                                urlMatches.Count == titleMatches.Count)
-                            {
-                                Console.WriteLine($"Extraídos {urlMatches.Count} pares de URL/título do script");
-
-                                for (int i = 0; i < Math.Min(10, urlMatches.Count); i++)
-                                {
-                                    var url = urlMatches[i].Groups[1].Value;
-                                    var title = WebUtility.HtmlDecode(titleMatches[i].Groups[2].Value);
-
-                                    // Verificar se a URL é do próprio site e não é uma URL de imagem ou outro recurso
-                                    if (url.Contains("theenemy.com.br") &&
-                                        !url.EndsWith(".jpg") && !url.EndsWith(".png") &&
-                                        !url.EndsWith(".css") && !url.EndsWith(".js"))
-                                    {
-                                        NewsFeed.Add(new NewsItem
-                                        {
-                                            Title = title,
-                                            Url = url,
-                                            Source = portal.Name
-                                        });
-                                        articlesFound = true;
-                                    }
-                                }
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"Erro ao processar script: {ex.Message}");
-                        }
-                    }
+                    Console.WriteLine("Nenhum link encontrado na página");
+                    return;
                 }
-            }
 
-            // Se não encontramos artigos nos scripts, tente a abordagem alternativa
-            if (!articlesFound)
-            {
-                // Buscar por links com características de artigos
-                var allLinks = htmlDoc.DocumentNode.SelectNodes("//a[@href]");
+                Console.WriteLine($"Encontrados {articleLinks.Count} links para análise");
 
-                if (allLinks != null)
+                var processedUrls = new HashSet<string>();
+                var articlesFound = 0;
+
+                foreach (var link in articleLinks)
                 {
-                    Console.WriteLine($"Analisando {allLinks.Count} links");
+                    var href = link.GetAttributeValue("href", "");
 
-                    // Filtrar links que parecem ser de artigos
-                    var articlePattern = new Regex(@"/(noticia|review|artigo|coluna|noticias)/", RegexOptions.IgnoreCase);
-                    var newsLinks = new List<HtmlNode>();
-
-                    foreach (var link in allLinks)
+                    // Filtrar apenas links que são artigos de games do Omelete
+                    if (string.IsNullOrEmpty(href) ||
+                        !href.StartsWith("/games/") ||
+                        href.Contains("/ofertas/") || // Excluir ofertas se necessário
+                        href.Length < 10) // Links muito curtos provavelmente não são artigos
                     {
-                        var href = link.GetAttributeValue("href", "");
-
-                        // Verificar se parece ser um link de artigo
-                        if (!string.IsNullOrEmpty(href) &&
-                            (articlePattern.IsMatch(href) ||
-                             href.Contains("theenemy.com.br") && !href.Equals(portal.Url) && !href.Contains("#") &&
-                             href.Split('/').Length > 4))
-                        {
-                            newsLinks.Add(link);
-                        }
+                        continue;
                     }
 
-                    // Processar os links encontrados
-                    if (newsLinks.Any())
+                    // Construir URL completa
+                    var fullUrl = $"https://www.omelete.com.br{href}";
+
+                    // Evitar duplicatas
+                    if (processedUrls.Contains(fullUrl))
+                        continue;
+
+                    processedUrls.Add(fullUrl);
+
+                    // Extrair título do link
+                    var title = ExtractTitleFromOmeleteLink(link);
+
+                    if (!string.IsNullOrWhiteSpace(title))
                     {
-                        Console.WriteLine($"Encontrados {newsLinks.Count} possíveis links de artigos");
-
-                        // Remover duplicatas baseado em URLs
-                        var processedUrls = new HashSet<string>();
-
-                        foreach (var node in newsLinks.Take(15)) // Pegamos mais para compensar possíveis duplicatas
-                        {
-                            var title = CleanHtml(node.InnerText);
-                            var url = node.GetAttributeValue("href", "");
-
-                            // Garantir que a URL seja absoluta
-                            if (!string.IsNullOrEmpty(url) && !url.StartsWith("http"))
-                                url = new Uri(new Uri(portal.Url), url).ToString();
-
-                            // Evitar duplicatas
-                            if (string.IsNullOrEmpty(url) || processedUrls.Contains(url))
-                                continue;
-
-                            processedUrls.Add(url);
-
-                            // Se o texto do link estiver vazio, tentar extrair título de elementos filhos
-                            if (string.IsNullOrWhiteSpace(title))
-                            {
-                                var textNodes = node.SelectNodes(".//text()");
-                                if (textNodes != null && textNodes.Any())
-                                {
-                                    title = CleanHtml(string.Join(" ", textNodes.Select(n => n.InnerText)));
-                                }
-                            }
-
-                            // Se ainda não temos título, extrair da URL
-                            if (string.IsNullOrWhiteSpace(title))
-                            {
-                                // Extrair última parte da URL e converter para título
-                                var urlParts = url.Split('/').Where(p => !string.IsNullOrWhiteSpace(p)).ToList();
-                                if (urlParts.Any())
-                                {
-                                    var lastPart = WebUtility.UrlDecode(urlParts.Last().Replace("-", " "));
-                                    title = CleanHtml(lastPart);
-                                    // Primeira letra maiúscula
-                                    if (!string.IsNullOrEmpty(title) && title.Length > 1)
-                                    {
-                                        title = char.ToUpper(title[0]) + title.Substring(1);
-                                    }
-                                }
-                            }
-
-                            if (!string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(url) && processedUrls.Count <= 10)
-                            {
-                                NewsFeed.Add(new NewsItem
-                                {
-                                    Title = title,
-                                    Url = url,
-                                    Source = portal.Name
-                                });
-                                articlesFound = true;
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Se ainda não encontramos artigos, tente extrair da meta tags
-            if (!articlesFound)
-            {
-                Console.WriteLine("Tentando extrair artigos das meta tags...");
-
-                var metaTags = htmlDoc.DocumentNode.SelectNodes("//meta[@property='og:url' or @property='og:title']");
-                if (metaTags != null && metaTags.Count >= 2)
-                {
-                    string url = null;
-                    string title = null;
-
-                    foreach (var meta in metaTags)
-                    {
-                        var property = meta.GetAttributeValue("property", "");
-                        var content = meta.GetAttributeValue("content", "");
-
-                        if (property == "og:url")
-                            url = content;
-                        else if (property == "og:title")
-                            title = content;
-                    }
-
-                    if (!string.IsNullOrEmpty(url) && !string.IsNullOrEmpty(title))
-                    {
-                        // Adicionar a própria página como uma notícia (geralmente é a principal)
                         NewsFeed.Add(new NewsItem
                         {
-                            Title = title,
+                            Title = CleanHtml(title),
+                            Url = fullUrl,
+                            Source = portal.Name
+                        });
+
+                        articlesFound++;
+
+                        // Limitar a 10-15 artigos para não sobrecarregar
+                        if (articlesFound >= 15)
+                            break;
+                    }
+                }
+
+                Console.WriteLine($"Encontrados {articlesFound} artigos do Omelete Games");
+
+                // Se não encontrou artigos suficientes com a abordagem principal, 
+                // tentar buscar por padrões alternativos
+                if (articlesFound < 5)
+                {
+                    TryAlternativeOmeleteParser(htmlDoc, portal, processedUrls);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao analisar Omelete Games: {ex.Message}");
+
+                // Fallback: tentar extrair pelo menos um artigo das meta tags
+                TryExtractFromMetaTags(htmlDoc, portal);
+            }
+        }
+
+        private string ExtractTitleFromOmeleteLink(HtmlNode linkNode)
+        {
+            // Primeiro, tentar pegar o texto direto do link
+            var directText = CleanHtml(linkNode.InnerText);
+            if (!string.IsNullOrWhiteSpace(directText) && directText.Length > 10)
+            {
+                return directText;
+            }
+
+            // Se não tem texto direto, buscar em elementos filhos
+            var textNodes = linkNode.SelectNodes(".//text()[normalize-space(.) != '']");
+            if (textNodes != null && textNodes.Any())
+            {
+                var combinedText = string.Join(" ", textNodes.Select(n => CleanHtml(n.InnerText)))
+                                        .Trim();
+                if (!string.IsNullOrWhiteSpace(combinedText) && combinedText.Length > 10)
+                {
+                    return combinedText;
+                }
+            }
+
+            // Se ainda não encontrou, tentar extrair de atributos como title ou aria-label
+            var titleAttr = linkNode.GetAttributeValue("title", "");
+            if (!string.IsNullOrWhiteSpace(titleAttr))
+            {
+                return CleanHtml(titleAttr);
+            }
+
+            var ariaLabel = linkNode.GetAttributeValue("aria-label", "");
+            if (!string.IsNullOrWhiteSpace(ariaLabel))
+            {
+                return CleanHtml(ariaLabel);
+            }
+
+            // Como último recurso, extrair título da URL
+            var href = linkNode.GetAttributeValue("href", "");
+            if (!string.IsNullOrEmpty(href))
+            {
+                return ExtractTitleFromUrl(href);
+            }
+
+            return string.Empty;
+        }
+
+        private void TryAlternativeOmeleteParser(HtmlDocument htmlDoc, NewsPortal portal, HashSet<string> processedUrls)
+        {
+            Console.WriteLine("Tentando parser alternativo para Omelete Games...");
+
+            try
+            {
+                // Buscar por estruturas de artigos mais específicas
+                var articleContainers = htmlDoc.DocumentNode.SelectNodes(
+                    "//article//a[@href] | //div[contains(@class, 'article')]//a[@href] | " +
+                    "//div[contains(@class, 'news')]//a[@href] | //div[contains(@class, 'post')]//a[@href]");
+
+                if (articleContainers != null)
+                {
+                    Console.WriteLine($"Encontrados {articleContainers.Count} containers de artigos alternativos");
+
+                    var articlesFound = 0;
+                    foreach (var container in articleContainers)
+                    {
+                        var href = container.GetAttributeValue("href", "");
+
+                        if (string.IsNullOrEmpty(href) || !href.StartsWith("/games/"))
+                            continue;
+
+                        var fullUrl = $"https://www.omelete.com.br{href}";
+
+                        if (processedUrls.Contains(fullUrl))
+                            continue;
+
+                        var title = ExtractTitleFromOmeleteLink(container);
+
+                        if (!string.IsNullOrWhiteSpace(title))
+                        {
+                            NewsFeed.Add(new NewsItem
+                            {
+                                Title = CleanHtml(title),
+                                Url = fullUrl,
+                                Source = portal.Name
+                            });
+
+                            processedUrls.Add(fullUrl);
+                            articlesFound++;
+
+                            if (articlesFound >= 10)
+                                break;
+                        }
+                    }
+
+                    Console.WriteLine($"Parser alternativo encontrou {articlesFound} artigos adicionais");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro no parser alternativo: {ex.Message}");
+            }
+        }
+
+        private void TryExtractFromMetaTags(HtmlDocument htmlDoc, NewsPortal portal)
+        {
+            Console.WriteLine("Tentando extrair artigo das meta tags...");
+
+            try
+            {
+                var urlMeta = htmlDoc.DocumentNode.SelectSingleNode("//meta[@property='og:url']");
+                var titleMeta = htmlDoc.DocumentNode.SelectSingleNode("//meta[@property='og:title']");
+
+                if (urlMeta != null && titleMeta != null)
+                {
+                    var url = urlMeta.GetAttributeValue("content", "");
+                    var title = titleMeta.GetAttributeValue("content", "");
+
+                    if (!string.IsNullOrEmpty(url) && !string.IsNullOrEmpty(title) &&
+                        url.Contains("omelete.com.br/games"))
+                    {
+                        NewsFeed.Add(new NewsItem
+                        {
+                            Title = CleanHtml(title),
                             Url = url,
                             Source = portal.Name
                         });
-                        articlesFound = true;
+
+                        Console.WriteLine("Artigo extraído das meta tags com sucesso");
                     }
                 }
             }
-
-            if (!articlesFound)
+            catch (Exception ex)
             {
-                Console.WriteLine($"Nenhum artigo encontrado para {portal.Name} usando todas as estratégias");
-                // Para debug, salvar o HTML em um arquivo
-                Console.WriteLine("HTML recebido: " + htmlDoc.DocumentNode.OuterHtml.Length + " caracteres");
+                Console.WriteLine($"Erro ao extrair das meta tags: {ex.Message}");
             }
+        }
+
+        private string ExtractTitleFromUrl(string url)
+        {
+            try
+            {
+                // Extrair a parte final da URL e converter em título legível
+                var urlParts = url.Split('/').Where(p => !string.IsNullOrWhiteSpace(p)).ToList();
+                if (urlParts.Any())
+                {
+                    var lastPart = WebUtility.UrlDecode(urlParts.Last())
+                                           .Replace("-", " ")
+                                           .Replace("_", " ");
+
+                    // Capitalizar primeira letra de cada palavra
+                    var words = lastPart.Split(' ');
+                    for (int i = 0; i < words.Length; i++)
+                    {
+                        if (words[i].Length > 0)
+                        {
+                            words[i] = char.ToUpper(words[i][0]) +
+                                      (words[i].Length > 1 ? words[i].Substring(1).ToLower() : "");
+                        }
+                    }
+
+                    return string.Join(" ", words);
+                }
+            }
+            catch
+            {
+                // Ignore errors and return empty
+            }
+
+            return string.Empty;
         }
 
         private void ParseTechTudo(HtmlDocument htmlDoc, NewsPortal portal)

@@ -17,7 +17,7 @@ namespace YourFeedGames
             {
                 new NewsPortal { Name = "FlowGames", Url = "https://flowgames.gg/", IsEnabled = Preferences.Get("FlowGames", true) },
                 new NewsPortal { Name = "Gameplayscassi", Url = "https://gameplayscassi.com.br/", IsEnabled = Preferences.Get("Gameplayscassi", true) },
-                new NewsPortal { Name = "TheEnemy", Url = "https://www.theenemy.com.br/", IsEnabled = Preferences.Get("TheEnemy", true) },
+                new NewsPortal { Name = "OmeleteGames", Url = "https://www.omelete.com.br/games", IsEnabled = Preferences.Get("OmeleteGames", true) },
                 new NewsPortal { Name = "IGNBrasil", Url = "https://br.ign.com/", IsEnabled = Preferences.Get("IGNBrasil", true) },
                 new NewsPortal { Name = "Voxel", Url = "https://voxel.com.br", IsEnabled = Preferences.Get("Voxel", true) },
                 new NewsPortal { Name = "GameVicio", Url = "https://www.gamevicio.com", IsEnabled = Preferences.Get("GameVicio", true) },
