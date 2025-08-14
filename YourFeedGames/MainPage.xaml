@@ -137,66 +137,92 @@
             <!-- ScrollView com as notícias -->
             <ScrollView x:Name="feedScrollView">
                 <CollectionView ItemsSource="{Binding NewsFeed}" 
-                                EmptyView="Nenhuma notícia disponível no momento">
+                                EmptyView="Nenhuma notícia disponível no momento"
+                                >
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
-                            <Frame BorderColor="LightGray" 
-                                   CornerRadius="10" 
-                                   Margin="0,5,0,10" 
-                                   Padding="15">
-                                <Grid RowDefinitions="Auto,Auto,Auto,Auto" 
-                                      RowSpacing="8">
-                                    <!-- Título da notícia -->
-                                    <Label Grid.Row="0" 
-                                           Text="{Binding Title}" 
-                                           FontSize="18" 
-                                           FontAttributes="Bold" 
-                                           LineBreakMode="WordWrap"/>
+                            <!-- Card estilo iOS/Material minimalista -->
+                            <Grid BackgroundColor="{AppThemeBinding Light=White, Dark=#1C1C1E}"
+                                  Padding="20">
+                                
+                                <!-- Background com borda sutil -->
+                                <RoundRectangle Fill="{AppThemeBinding Light=White, Dark=#1C1C1E}"
+                                               CornerRadius="12"
+                                               Stroke="{AppThemeBinding Light=#F0F0F0, Dark=#2C2C2E}"
+                                               StrokeThickness="1" />
+                                
+                                <!-- Sombra suave -->
+                                <RoundRectangle Fill="Transparent"
+                                               CornerRadius="12">
+                                    <RoundRectangle.Shadow>
+                                        <Shadow Brush="{AppThemeBinding Light=#10000000, Dark=#30000000}"
+                                                Offset="0,2"
+                                                Radius="8"
+                                                Opacity="1" />
+                                    </RoundRectangle.Shadow>
+                                </RoundRectangle>
 
-                                    <!-- Descrição da notícia (se disponível) -->
-                                    <Label Grid.Row="1" 
-                                           Text="{Binding Description}" 
+                                <!-- Conteúdo -->
+                                <StackLayout Spacing="12" Margin="16">
+                                    
+                                    <!-- Título principal -->
+                                    <Label Text="{Binding Title}" 
+                                           FontSize="16" 
+                                           FontFamily="SegoeUIBold"
+                                           TextColor="{AppThemeBinding Light=#1D1D1F, Dark=#F2F2F7}"
+                                           LineBreakMode="WordWrap"
+                                           MaxLines="3" />
+
+                                    <!-- Descrição -->
+                                    <Label Text="{Binding Description}" 
                                            FontSize="14"
+                                           TextColor="{AppThemeBinding Light=#6D6D80, Dark=#8E8E93}"
                                            IsVisible="{Binding Description, Converter={StaticResource StringNotEmptyConverter}}"
-                                           Margin="0,5,0,0"
                                            LineBreakMode="TailTruncation"
-                                           MaxLines="3"/>
+                                           MaxLines="2"
+                                           Margin="0,-4,0,0" />
 
-                                    <!-- Fonte da notícia -->
-                                    <StackLayout Grid.Row="2" Orientation="Horizontal" Spacing="5">
-                                        <Label Text="Fonte:" 
+                                    <!-- Footer com fonte e ações -->
+                                    <Grid ColumnDefinitions="*,Auto,Auto" 
+                                          ColumnSpacing="12"
+                                          Margin="0,8,0,0">
+                                        
+                                        <!-- Fonte -->
+                                        <Label Grid.Column="0"
+                                               Text="{Binding Source}" 
                                                FontSize="12" 
-                                               TextColor="Gray"
-                                               FontAttributes="Bold"/>
-                                        <Label Text="{Binding Source}" 
-                                               FontSize="12" 
-                                               TextColor="Gray"/>
-                                    </StackLayout>
+                                               TextColor="{AppThemeBinding Light=#8E8E93, Dark=#6D6D80}"
+                                               VerticalOptions="Center" />
 
-                                    <!-- Botões "Ler mais" e "Compartilhar" -->
-                                    <StackLayout Grid.Row="3" 
-                                                 Orientation="Horizontal" 
-                                                 HorizontalOptions="End"
-                                                 Spacing="10">
-                                        <Button Text="Ler mais" 
+                                        <!-- Botão Ler mais -->
+                                        <Button Grid.Column="1"
+                                                Text="📖"
                                                 CommandParameter="{Binding Url}" 
                                                 Clicked="OnReadMoreClicked"
-                                                WidthRequest="100"
-                                                HeightRequest="40"
-                                                Margin="0,5,0,0"
-                                                BackgroundColor="#3498db"
-                                                TextColor="White"/>
+                                                BackgroundColor="Transparent"
+                                                TextColor="{AppThemeBinding Light=#007AFF, Dark=#0A84FF}"
+                                                FontSize="16"
+                                                WidthRequest="32"
+                                                HeightRequest="32"
+                                                CornerRadius="16"
+                                                Padding="0" />
 
-                                        <Button ImageSource="share_24dp.png"
+                                        <!-- Botão compartilhar minimalista -->
+                                        <Button Grid.Column="2"
+                                                Text="↗"
                                                 CommandParameter="{Binding Url}" 
                                                 Clicked="OnShareClicked"
-                                                WidthRequest="40"
-                                                HeightRequest="40"
-                                                Margin="0,5,0,0"
-                                                BackgroundColor="#2ecc71" />
-                                    </StackLayout>
-                                </Grid>
-                            </Frame>
+                                                BackgroundColor="Transparent"
+                                                TextColor="{AppThemeBinding Light=#FF6B35, Dark=#FF8A65}"
+                                                FontSize="16"
+                                                WidthRequest="32"
+                                                HeightRequest="32"
+                                                CornerRadius="16"
+                                                Padding="0" />
+
+                                    </Grid>
+                                </StackLayout>
+                            </Grid>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
