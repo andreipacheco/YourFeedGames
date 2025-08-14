@@ -901,7 +901,15 @@ namespace YourFeedGames
                 var processedUrls = new HashSet<string>();
                 int addedCount = 0;
 
-                // Tentativa 1: Notícias principais em formato de cards
+                // Lista de títulos a serem ignorados
+                var titulosIgnorados = new[]
+                {
+                    "0 Só demorou 25 anos REVIEW | Fatal Fury: City of the Wolves é a volta que a série merecia",
+                    "0 Soulslike que segue a receita REVIEW | The First Berserker: Khazan é um soulslike básico e competente",
+                    "0 Merece sua atenção REVIEW | Split Fiction é videogame em sua forma mais pura",
+                    "0 A luta pela sobrevivência continua REVIEW | Frostpunk 2 mostra o que acontece depois do fim do mundo"
+                };
+
                 var newsNodes = htmlDoc.DocumentNode.SelectNodes("//div[contains(@class, 'article-card')]") ??
                                 htmlDoc.DocumentNode.SelectNodes("//article");
 
@@ -911,6 +919,7 @@ namespace YourFeedGames
 
                     foreach (var node in newsNodes)
                     {
+
                         if (addedCount >= 10) break;
 
                         // Ampliar os seletores para capturar mais padrões de links e títulos
@@ -927,13 +936,20 @@ namespace YourFeedGames
                             var url = linkNode.GetAttributeValue("href", "").Trim();
                             var title = CleanHtml(linkNode.InnerText).Trim();
 
-                            // Debug info
+                            // Ignorar títulos indesejados
+                            if (titulosIgnorados.Contains(title))
+                            {
+                                Console.WriteLine($"Notícia ignorada: {title}");
+                                continue;
+                            }
+
                             Console.WriteLine($"URL Extraída: '{url}'");
                             Console.WriteLine($"Título Extraído: '{title}'");
 
                             // Garantir que a URL seja absoluta
                             if (!string.IsNullOrEmpty(url))
                             {
+                                Console.WriteLine($"Notícia ignorada: {title}");
                                 if (!url.StartsWith("http"))
                                 {
                                     url = new Uri(new Uri(portal.Url), url).ToString();
