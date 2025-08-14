@@ -6,7 +6,6 @@
              xmlns:converters="clr-namespace:YourFeedGames.Converters"
              Title="Feed de Notícias">
 
-
     <ContentPage.Resources>
         <ResourceDictionary>
             <converters:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
@@ -16,28 +15,27 @@
     <Grid RowDefinitions="Auto,*,Auto" Padding="10">
         <!-- Barra superior com título e botões -->
         <Grid Grid.Row="0"
-      RowDefinitions="Auto,Auto"
-      ColumnDefinitions="*,Auto,Auto,Auto"
-      Margin="0,0,0,10">
+              RowDefinitions="Auto,Auto,Auto"
+              ColumnDefinitions="*,Auto,Auto,Auto"
+              Margin="0,0,0,10">
 
-            <!-- Primeira linha: Título e botões -->
-            <!-- Título -->
+            <!-- Primeira linha: Título e botões de ação -->
             <Label Grid.Row="0" Grid.Column="0" 
-           Text="Your Feed Games" 
-           FontSize="Title" 
-           FontAttributes="Bold" 
-           VerticalOptions="Center" />
+                   Text="Your Feed Games" 
+                   FontSize="Title" 
+                   FontAttributes="Bold" 
+                   VerticalOptions="Center" />
 
             <!-- Botão de Refresh -->
             <Grid Grid.Row="0" Grid.Column="1"
-          HorizontalOptions="Center"
-          VerticalOptions="Center">
+                  HorizontalOptions="Center"
+                  VerticalOptions="Center">
                 <skia:SKLottieView
-                Source="refresh.json"
-                RepeatCount="1"
-                HeightRequest="50"
-                WidthRequest="50"
-                HorizontalOptions="Center">
+                    Source="refresh.json"
+                    RepeatCount="1"
+                    HeightRequest="50"
+                    WidthRequest="50"
+                    HorizontalOptions="Center">
                     <skia:SKLottieView.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnRefreshClicked"/>
                     </skia:SKLottieView.GestureRecognizers>
@@ -46,14 +44,14 @@
 
             <!-- Botão de Hot News -->
             <Grid Grid.Row="0" Grid.Column="2"
-          HorizontalOptions="Center"
-          VerticalOptions="Center">
+                  HorizontalOptions="Center"
+                  VerticalOptions="Center">
                 <skia:SKLottieView
-                Source="fire2.json"
-                RepeatCount="-1"
-                HeightRequest="50"
-                WidthRequest="50"
-                HorizontalOptions="Center">
+                    Source="fire2.json"
+                    RepeatCount="-1"
+                    HeightRequest="50"
+                    WidthRequest="50"
+                    HorizontalOptions="Center">
                     <skia:SKLottieView.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnHotNewsClicked"/>
                     </skia:SKLottieView.GestureRecognizers>
@@ -62,14 +60,14 @@
 
             <!-- Botão de Configurações -->
             <Grid Grid.Row="0" Grid.Column="3"
-          HorizontalOptions="Center"
-          VerticalOptions="Center">
+                  HorizontalOptions="Center"
+                  VerticalOptions="Center">
                 <skia:SKLottieView
-                Source="settings.json"
-                RepeatCount="1"
-                HeightRequest="50"
-                WidthRequest="50"
-                HorizontalOptions="Center">
+                    Source="settings.json"
+                    RepeatCount="1"
+                    HeightRequest="50"
+                    WidthRequest="50"
+                    HorizontalOptions="Center">
                     <skia:SKLottieView.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnSettingsClicked"/>
                     </skia:SKLottieView.GestureRecognizers>
@@ -78,11 +76,31 @@
 
             <!-- Segunda linha: Picker -->
             <Picker Grid.Row="1" Grid.ColumnSpan="4"
-            x:Name="portalPicker"
-            Title="Filtrar por portal"
-            SelectedIndexChanged="OnPortalPickerSelectedIndexChanged"
-            HorizontalOptions="FillAndExpand"
-            Margin="0,10,0,0" />
+                    x:Name="portalPicker"
+                    Title="Filtrar por portal"
+                    SelectedIndexChanged="OnPortalPickerSelectedIndexChanged"
+                    HorizontalOptions="FillAndExpand"
+                    Margin="0,10,0,0" />
+
+            <!-- Terceira linha: Botão de Resumo -->
+            <Button Grid.Row="2" Grid.ColumnSpan="4"
+                    Text="📰 Resumo IA - 2 minutos de leitura"
+                    Clicked="OnSummaryClicked"
+                    BackgroundColor="{AppThemeBinding Light=#2196F3, Dark=#1976D2}"
+                    TextColor="White"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    CornerRadius="25"
+                    HeightRequest="50"
+                    HorizontalOptions="FillAndExpand"
+                    Margin="0,15,0,5">
+                <Button.Shadow>
+                    <Shadow Brush="Gray"
+                            Offset="0,2"
+                            Radius="4"
+                            Opacity="0.3" />
+                </Button.Shadow>
+            </Button>
         </Grid>
 
         <!-- Conteúdo principal -->
@@ -94,10 +112,10 @@
                         VerticalOptions="Center"
                         Spacing="20">
                 <ActivityIndicator x:Name="loadingIndicator"
-                                     IsRunning="True" 
-                                     Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource Secondary}}"
-                                     HeightRequest="50"
-                                     WidthRequest="50"/>    
+                                   IsRunning="True" 
+                                   Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource Secondary}}"
+                                   HeightRequest="50"
+                                   WidthRequest="50"/>
 
                 <Label x:Name="loadingLabel" 
                        Text="Carregando feeds de notícias..." 
@@ -119,7 +137,7 @@
             <!-- ScrollView com as notícias -->
             <ScrollView x:Name="feedScrollView">
                 <CollectionView ItemsSource="{Binding NewsFeed}" 
-                    EmptyView="Nenhuma notícia disponível no momento">
+                                EmptyView="Nenhuma notícia disponível no momento">
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
                             <Frame BorderColor="LightGray" 
@@ -167,7 +185,7 @@
                                                 HeightRequest="40"
                                                 Margin="0,5,0,0"
                                                 BackgroundColor="#3498db"
-                                                TextColor="White"/> 
+                                                TextColor="White"/>
 
                                         <Button ImageSource="share_24dp.png"
                                                 CommandParameter="{Binding Url}" 
@@ -175,8 +193,7 @@
                                                 WidthRequest="40"
                                                 HeightRequest="40"
                                                 Margin="0,5,0,0"
-                                                BackgroundColor="#2ecc71"
-                                            />
+                                                BackgroundColor="#2ecc71" />
                                     </StackLayout>
                                 </Grid>
                             </Frame>

@@ -1,8 +1,10 @@
 ﻿using HtmlAgilityPack;
+using Pagamentos;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Net;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace YourFeedGames
@@ -904,11 +906,11 @@ namespace YourFeedGames
                 // Lista de títulos a serem ignorados
                 var titulosIgnorados = new[]
                 {
-                    "0 Só demorou 25 anos REVIEW | Fatal Fury: City of the Wolves é a volta que a série merecia",
-                    "0 Soulslike que segue a receita REVIEW | The First Berserker: Khazan é um soulslike básico e competente",
-                    "0 Merece sua atenção REVIEW | Split Fiction é videogame em sua forma mais pura",
-                    "0 A luta pela sobrevivência continua REVIEW | Frostpunk 2 mostra o que acontece depois do fim do mundo"
-                };
+            "0 Só demorou 25 anos REVIEW | Fatal Fury: City of the Wolves é a volta que a série merecia",
+            "0 Soulslike que segue a receita REVIEW | The First Berserker: Khazan é um soulslike básico e competente",
+            "0 Merece sua atenção REVIEW | Split Fiction é videogame em sua forma mais pura",
+            "0 A luta pela sobrevivência continua REVIEW | Frostpunk 2 mostra o que acontece depois do fim do mundo"
+        };
 
                 var newsNodes = htmlDoc.DocumentNode.SelectNodes("//div[contains(@class, 'article-card')]") ??
                                 htmlDoc.DocumentNode.SelectNodes("//article");
@@ -919,13 +921,9 @@ namespace YourFeedGames
 
                     foreach (var node in newsNodes)
                     {
+                        if (addedCount >= 10) break; // Só para quando realmente adicionou 10 notícias válidas
 
-                        if (addedCount >= 10) break;
-
-                        // Ampliar os seletores para capturar mais padrões de links e títulos
                         var linkNode = node.SelectSingleNode(".//a[contains(@class, 'title')] | .//h2/a | .//h3/a | .//a[contains(@class, 'post-title')] | .//h2//a | .//h3//a | .//a[contains(@class, 'headline')]");
-
-                        // Se não encontrar com os seletores específicos, tente qualquer link dentro do card
                         if (linkNode == null)
                         {
                             linkNode = node.SelectSingleNode(".//a[@href]");
@@ -943,26 +941,20 @@ namespace YourFeedGames
                                 continue;
                             }
 
-                            Console.WriteLine($"URL Extraída: '{url}'");
-                            Console.WriteLine($"Título Extraído: '{title}'");
-
                             // Garantir que a URL seja absoluta
                             if (!string.IsNullOrEmpty(url))
                             {
-                                Console.WriteLine($"Notícia ignorada: {title}");
                                 if (!url.StartsWith("http"))
                                 {
                                     url = new Uri(new Uri(portal.Url), url).ToString();
                                 }
 
-                                // Filtrar URLs inválidas
                                 if (url.Contains("#comments") || url.Contains("page=") || title.Length < 10)
                                 {
                                     Console.WriteLine($"URL ignorada: {url}");
                                     continue;
                                 }
 
-                                // Adicionar ao feed se não for duplicado
                                 if (!string.IsNullOrEmpty(title) && !processedUrls.Contains(url))
                                 {
                                     NewsFeed.Add(new NewsItem
@@ -1681,8 +1673,8 @@ namespace YourFeedGames
                     // Filtrar apenas links que são artigos de games do Omelete
                     if (string.IsNullOrEmpty(href) ||
                         !href.StartsWith("/games/") ||
-                        href.Contains("/ofertas/") || // Excluir ofertas se necessário
-                        href.Length < 10) // Links muito curtos provavelmente não são artigos
+                        href.Contains("/ofertas/") // Excluir ofertas se necessário
+                        )
                     {
                         continue;
                     }
@@ -1993,5 +1985,85 @@ namespace YourFeedGames
                 });
             }
         }
+
+        private async void OnSummaryClicked(object sender, EventArgs e)
+        {
+            try
+            {
+                // Coletar títulos e descrições das notícias
+                var textos = NewsFeed
+                    .Where(n => !string.IsNullOrEmpty(n.Title))
+                    .Select(n => $"{n.Title}: {n.Description ?? ""}")
+                    .ToList();
+
+                // Verificar se há notícias para resumir
+                if (!textos.Any())
+                {
+                    await DisplayAlert("Aviso", "Nenhuma notícia encontrada para resumir.", "OK");
+                    return;
+                }
+
+                // Montar o texto para resumir
+                var textoParaResumo = string.Join("\n", textos);
+
+                // Navegar imediatamente para a página de resumo (que iniciará o loading)
+                var summaryPage = new SummaryPage(textoParaResumo);
+                await Navigation.PushAsync(summaryPage);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao navegar para resumo: {ex}");
+                await DisplayAlert("Erro", "Erro ao abrir página de resumo. Tente novamente.", "OK");
+            }
+        }
+
+        //private async Task<string> GerarResumoComIA(string texto)
+        //{
+        //    var apiKey = Secrets.apiKeyGeminiIA;
+        //    var endpoint = $"{Secrets.geminiBaseUrl}?key={Secrets.apiKeyGeminiIA}";
+
+        //    var prompt = $"Resuma as principais notícias abaixo em até 2 minutos de leitura, focando nos fatos mais relevantes, verifique se as notícias se repetem em diferentes portais e dê destaque para essas notícias:\n{texto}";
+
+        //    var body = new
+        //    {
+        //        contents = new[]
+        //        {
+        //    new
+        //    {
+        //        parts = new[]
+        //        {
+        //            new { text = prompt }
+        //        }
+        //    }
+        //}
+        //    };
+
+        //    var jsonBody = JsonSerializer.Serialize(body, new JsonSerializerOptions
+        //    {
+        //        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        //    });
+
+        //    using var client = new HttpClient();
+        //    var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+
+        //    var response = await client.PostAsync(endpoint, content);
+        //    var json = await response.Content.ReadAsStringAsync();
+
+        //    if (!response.IsSuccessStatusCode)
+        //    {
+        //        throw new Exception($"Erro Gemini: {response.StatusCode} - {json}");
+        //    }
+
+        //    var doc = JsonDocument.Parse(json);
+        //    var resumo = doc.RootElement
+        //        .GetProperty("candidates")[0]
+        //        .GetProperty("content")
+        //        .GetProperty("parts")[0]
+        //        .GetProperty("text")
+        //        .GetString();
+
+        //    return resumo ?? "Não foi possível gerar o resumo.";
+        //}
+
     }
 }
