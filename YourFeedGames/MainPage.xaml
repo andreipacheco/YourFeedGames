@@ -16,25 +16,41 @@
         <!-- Barra superior com título e botões -->
         <Grid Grid.Row="0"
               RowDefinitions="Auto,Auto,Auto"
-              ColumnDefinitions="*,Auto,Auto,Auto"
-              Margin="0,0,0,10">
+              ColumnDefinitions="*,Auto,Auto,Auto,Auto"
+              Margin="10,0,0,10">
 
             <!-- Primeira linha: Título e botões de ação -->
             <Label Grid.Row="0" Grid.Column="0" 
-                   Text="Your Feed Games" 
-                   FontSize="Title" 
+                   Text="O seu Feed de notícias Gamer" 
+                   FontSize="Small" 
                    FontAttributes="Bold" 
                    VerticalOptions="Center" />
 
-            <!-- Botão de Refresh -->
+            <!-- Botão de Eventos -->
             <Grid Grid.Row="0" Grid.Column="1"
+                  HorizontalOptions="Center"
+                  VerticalOptions="Center">
+                <skia:SKLottieView
+                    Source="event.json"
+                    RepeatCount="-1"
+                    HeightRequest="40"
+                    WidthRequest="40"
+                    HorizontalOptions="Center">
+                    <skia:SKLottieView.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnEventsClicked"/>
+                    </skia:SKLottieView.GestureRecognizers>
+                </skia:SKLottieView>
+            </Grid>
+
+            <!-- Botão de Refresh -->
+            <Grid Grid.Row="0" Grid.Column="2"
                   HorizontalOptions="Center"
                   VerticalOptions="Center">
                 <skia:SKLottieView
                     Source="refresh.json"
                     RepeatCount="1"
-                    HeightRequest="50"
-                    WidthRequest="50"
+                    HeightRequest="40"
+                    WidthRequest="40"
                     HorizontalOptions="Center">
                     <skia:SKLottieView.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnRefreshClicked"/>
@@ -43,14 +59,14 @@
             </Grid>
 
             <!-- Botão de Hot News -->
-            <Grid Grid.Row="0" Grid.Column="2"
+            <Grid Grid.Row="0" Grid.Column="3"
                   HorizontalOptions="Center"
                   VerticalOptions="Center">
                 <skia:SKLottieView
                     Source="fire2.json"
                     RepeatCount="-1"
-                    HeightRequest="50"
-                    WidthRequest="50"
+                    HeightRequest="40"
+                    WidthRequest="40"
                     HorizontalOptions="Center">
                     <skia:SKLottieView.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnHotNewsClicked"/>
@@ -59,14 +75,14 @@
             </Grid>
 
             <!-- Botão de Configurações -->
-            <Grid Grid.Row="0" Grid.Column="3"
+            <Grid Grid.Row="0" Grid.Column="4"
                   HorizontalOptions="Center"
                   VerticalOptions="Center">
                 <skia:SKLottieView
                     Source="settings.json"
                     RepeatCount="1"
-                    HeightRequest="50"
-                    WidthRequest="50"
+                    HeightRequest="40"
+                    WidthRequest="40"
                     HorizontalOptions="Center">
                     <skia:SKLottieView.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnSettingsClicked"/>
@@ -80,7 +96,7 @@
                     Title="Filtrar por portal"
                     SelectedIndexChanged="OnPortalPickerSelectedIndexChanged"
                     HorizontalOptions="FillAndExpand"
-                    Margin="0,10,0,0" />
+                    Margin="0,10,0,10" />
 
             <!-- Terceira linha: Botão de Resumo -->
             <Button Grid.Row="2" Grid.ColumnSpan="4"
@@ -93,7 +109,7 @@
                     CornerRadius="25"
                     HeightRequest="50"
                     HorizontalOptions="FillAndExpand"
-                    Margin="0,15,0,5">
+                    Margin="0,15,0,0">
                 <Button.Shadow>
                     <Shadow Brush="Gray"
                             Offset="0,2"

@@ -78,6 +78,9 @@
 	  <MauiXaml Update="SummaryPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	<MauiXaml Update="EventsPage.xaml">
+		<Generator>MSBuild:Compile</Generator>
+	</MauiXaml>
 	</ItemGroup>
 
 </Project>

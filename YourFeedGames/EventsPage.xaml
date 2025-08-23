@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="YourFeedGames.EventsPage"
+             Title="Eventos de Games">
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="16">
+
+            <!-- Tokyo Game Show (TGS) -->
+            <Frame HasShadow="True" CornerRadius="12" Padding="14">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Tokyo Game Show (TGS)"
+                           FontAttributes="Bold"
+                           FontSize="18" />
+                    <Label Text="25–28 de setembro • Chiba (Japão). Participação de gigantes como Microsoft/Xbox."
+                           FontSize="14"
+                           TextColor="{DynamicResource SecondaryTextColor}" />
+                    <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                        <CheckBox x:Name="TgsNotifyCheckBox" />
+                        <Label Text="Notifique-me do evento"
+                               VerticalTextAlignment="Center" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- The Game Awards 2025 -->
+            <Frame HasShadow="True" CornerRadius="12" Padding="14">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="The Game Awards 2025"
+                           FontAttributes="Bold"
+                           FontSize="18" />
+                    <Label Text="11 de dezembro • Peacock Theater, Los Angeles. Celebra os principais títulos do ano."
+                           FontSize="14"
+                           TextColor="{DynamicResource SecondaryTextColor}" />
+                    <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                        <CheckBox x:Name="TgaNotifyCheckBox" />
+                        <Label Text="Notifique-me do evento"
+                               VerticalTextAlignment="Center" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

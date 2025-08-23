@@ -21,5 +21,10 @@
         Title="Configurações"
         ContentTemplate="{DataTemplate local:SettingsPage}"
         Route="SettingsPage" />
+
+    <ShellContent
+         Title="Eventos"
+         ContentTemplate="{DataTemplate local:EventsPage}"
+         Route="EventsPage" />
 </Shell>
 
