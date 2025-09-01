@@ -10,37 +10,60 @@ public partial class EventsPage : ContentPage
     // OneSignal tem limite de agendamento - geralmente 30 dias no máximo
     private static readonly TimeSpan MAX_SCHEDULE_AHEAD = TimeSpan.FromDays(30);
 
+    // Estados dos botões para controlar se as notificações estão ativas
+    private bool _tgsNotificationsActive = false;
+    private bool _tgaNotificationsActive = false;
+
     public EventsPage()
     {
         InitializeComponent();
         _oneSignalService = new OneSignalService();
         _playerId = GetCurrentPlayerId();
-
-        TgsNotifyCheckBox.CheckedChanged += OnTgsNotifyChanged;
-        TgaNotifyCheckBox.CheckedChanged += OnTgaNotifyChanged;
     }
 
-    private async void OnTgsNotifyChanged(object sender, CheckedChangedEventArgs e)
+    private async void OnTgsNotifyClicked(object sender, EventArgs e)
     {
-        if (e.Value)
+        if (!_tgsNotificationsActive)
         {
-            await AgendarNotificacaoTgs();
+            // Ativar notificações
+            bool success = await AgendarNotificacaoTgs();
+            if (success)
+            {
+                _tgsNotificationsActive = true;
+                TgsNotifyButton.Text = "🔕 Desativar Notificações";
+                TgsNotifyButton.BackgroundColor = Colors.Gray;
+            }
         }
         else
         {
+            // Desativar notificações
             await CancelarNotificacoes("Tokyo Game Show 2025");
+            _tgsNotificationsActive = false;
+            TgsNotifyButton.Text = "🔔 Ativar Notificações";
+            TgsNotifyButton.BackgroundColor = (Color)Application.Current.Resources["Primary"];
         }
     }
 
-    private async void OnTgaNotifyChanged(object sender, CheckedChangedEventArgs e)
+    private async void OnTgaNotifyClicked(object sender, EventArgs e)
     {
-        if (e.Value)
+        if (!_tgaNotificationsActive)
         {
-            await AgendarNotificacaoTga();
+            // Ativar notificações
+            bool success = await AgendarNotificacaoTga();
+            if (success)
+            {
+                _tgaNotificationsActive = true;
+                TgaNotifyButton.Text = "🔕 Desativar Notificações";
+                TgaNotifyButton.BackgroundColor = Colors.Gray;
+            }
         }
         else
         {
+            // Desativar notificações
             await CancelarNotificacoes("The Game Awards 2025");
+            _tgaNotificationsActive = false;
+            TgaNotifyButton.Text = "🔔 Ativar Notificações";
+            TgaNotifyButton.BackgroundColor = (Color)Application.Current.Resources["Primary"];
         }
     }
 
@@ -70,7 +93,7 @@ public partial class EventsPage : ContentPage
         }
     }
 
-    private async Task AgendarNotificacaoTgs()
+    private async Task<bool> AgendarNotificacaoTgs()
     {
         try
         {
@@ -84,7 +107,7 @@ public partial class EventsPage : ContentPage
                 await DisplayAlert("⚠️ Evento Passado",
                     "O Tokyo Game Show 2025 já aconteceu ou está acontecendo agora!",
                     "OK");
-                return;
+                return false;
             }
 
             var notificacoes = new List<(string titulo, string conteudo, DateTime dataEnvio)>();
@@ -129,7 +152,7 @@ public partial class EventsPage : ContentPage
                     $"O OneSignal só permite agendar notificações com até {MAX_SCHEDULE_AHEAD.TotalDays} dias de antecedência.\n\n" +
                     "Tente novamente mais próximo da data do evento!",
                     "Entendi");
-                return;
+                return false;
             }
 
             // Agenda as notificações disponíveis
@@ -156,16 +179,18 @@ public partial class EventsPage : ContentPage
             }
 
             await DisplayAlert("✅ Notificações Agendadas", mensagem, "Perfeito!");
+            return true;
         }
         catch (Exception ex)
         {
             await DisplayAlert("❌ Erro",
                 $"Não foi possível agendar as notificações:\n{ex.Message}",
                 "OK");
+            return false;
         }
     }
 
-    private async Task AgendarNotificacaoTga()
+    private async Task<bool> AgendarNotificacaoTga()
     {
         try
         {
@@ -178,7 +203,7 @@ public partial class EventsPage : ContentPage
                 await DisplayAlert("⚠️ Evento Passado",
                     "O The Game Awards 2025 já aconteceu ou está acontecendo agora!",
                     "OK");
-                return;
+                return false;
             }
 
             var notificacoes = new List<(string titulo, string conteudo, DateTime dataEnvio)>();
@@ -233,7 +258,7 @@ public partial class EventsPage : ContentPage
                     $"O OneSignal só permite agendar notificações com até {MAX_SCHEDULE_AHEAD.TotalDays} dias de antecedência.\n\n" +
                     "Tente novamente mais próximo da data do evento!",
                     "Entendi");
-                return;
+                return false;
             }
 
             var ids = await _oneSignalService.AgendarNotificacoesEventoAsync(
@@ -261,12 +286,14 @@ public partial class EventsPage : ContentPage
             }
 
             await DisplayAlert("✅ Notificações Agendadas", mensagem, "Fantástico!");
+            return true;
         }
         catch (Exception ex)
         {
             await DisplayAlert("❌ Erro",
                 $"Não foi possível agendar as notificações:\n{ex.Message}",
                 "OK");
+            return false;
         }
     }
 

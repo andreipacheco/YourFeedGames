@@ -3,43 +3,45 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="YourFeedGames.EventsPage"
              Title="Eventos de Games">
-    <ScrollView>
-        <VerticalStackLayout Padding="16" Spacing="16">
-
-            <!-- Tokyo Game Show (TGS) -->
-            <Frame HasShadow="True" CornerRadius="12" Padding="14">
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="Tokyo Game Show (TGS)"
+	<ScrollView>
+		<VerticalStackLayout Padding="16" Spacing="16">
+			<!-- Tokyo Game Show (TGS) -->
+			<Frame HasShadow="True" CornerRadius="12" Padding="14">
+				<VerticalStackLayout Spacing="12">
+					<Label Text="Tokyo Game Show (TGS)"
                            FontAttributes="Bold"
                            FontSize="18" />
-                    <Label Text="25–28 de setembro • Chiba (Japão). Participação de gigantes como Microsoft/Xbox."
+					<Label Text="25–28 de setembro • Chiba (Japão). Participação de gigantes como Microsoft/Xbox."
                            FontSize="14"
                            TextColor="{DynamicResource SecondaryTextColor}" />
-                    <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
-                        <CheckBox x:Name="TgsNotifyCheckBox" />
-                        <Label Text="Notifique-me do evento"
-                               VerticalTextAlignment="Center" />
-                    </HorizontalStackLayout>
-                </VerticalStackLayout>
-            </Frame>
+					<Button x:Name="TgsNotifyButton"
+                            Text="🔔 Ativar Notificações"
+                            BackgroundColor="{DynamicResource Primary}"
+                            TextColor="White"
+                            CornerRadius="8"
+                            HeightRequest="44"
+                            Clicked="OnTgsNotifyClicked" />
+				</VerticalStackLayout>
+			</Frame>
 
-            <!-- The Game Awards 2025 -->
-            <Frame HasShadow="True" CornerRadius="12" Padding="14">
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="The Game Awards 2025"
+			<!-- The Game Awards 2025 -->
+			<Frame HasShadow="True" CornerRadius="12" Padding="14">
+				<VerticalStackLayout Spacing="12">
+					<Label Text="The Game Awards 2025"
                            FontAttributes="Bold"
                            FontSize="18" />
-                    <Label Text="11 de dezembro • Peacock Theater, Los Angeles. Celebra os principais títulos do ano."
+					<Label Text="11 de dezembro • Peacock Theater, Los Angeles. Celebra os principais títulos do ano."
                            FontSize="14"
                            TextColor="{DynamicResource SecondaryTextColor}" />
-                    <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
-                        <CheckBox x:Name="TgaNotifyCheckBox" />
-                        <Label Text="Notifique-me do evento"
-                               VerticalTextAlignment="Center" />
-                    </HorizontalStackLayout>
-                </VerticalStackLayout>
-            </Frame>
-
-        </VerticalStackLayout>
-    </ScrollView>
+					<Button x:Name="TgaNotifyButton"
+                            Text="🔔 Ativar Notificações"
+                            BackgroundColor="{DynamicResource Primary}"
+                            TextColor="White"
+                            CornerRadius="8"
+                            HeightRequest="44"
+                            Clicked="OnTgaNotifyClicked" />
+				</VerticalStackLayout>
+			</Frame>
+		</VerticalStackLayout>
+	</ScrollView>
 </ContentPage>
