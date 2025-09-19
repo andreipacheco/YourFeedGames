@@ -257,7 +257,7 @@ namespace YourFeedGames
                     new NewsPortal { Name = "Voxel", Url = "https://www.tecmundo.com.br/voxel", IsEnabled = Preferences.Get("Voxel", true) },
                     new NewsPortal { Name = "GameVicio", Url = "https://www.gamevicio.com", IsEnabled = Preferences.Get("GameVicio", true) },
                     new NewsPortal { Name = "TechTudo", Url = "https://www.techtudo.com.br/jogos/", IsEnabled = Preferences.Get("TechTudo", true) },
-                    new NewsPortal { Name = "Adrenaline", Url = "https://www.adrenaline.com.br/noticias/", IsEnabled = Preferences.Get("Adrenaline", true) },
+                    // new NewsPortal { Name = "Adrenaline", Url = "https://www.adrenaline.com.br/noticias/", IsEnabled = Preferences.Get("Adrenaline", true) },
                     new NewsPortal { Name = "ComboInfinito", Url = "https://www.comboinfinito.com.br/principal/", IsEnabled = Preferences.Get("ComboInfinito", true) },
                     new NewsPortal { Name = "Arkade", Url = "https://arkade.com.br/", IsEnabled = Preferences.Get("Arkade", true) }
                 };
@@ -503,8 +503,8 @@ namespace YourFeedGames
                     case "TechTudo":
                         ParseTechTudo(htmlDoc, portal);
                         break;
-                    case "Adrenaline":
-                        ParseAdrenaline(htmlDoc, portal);
+                    //case "Adrenaline":
+                    //    ParseAdrenaline(htmlDoc, portal);
                         break;
                     case "ComboInfinito":
                         ParseComboInfinito(htmlDoc, portal);
