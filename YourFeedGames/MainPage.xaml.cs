@@ -259,7 +259,8 @@ namespace YourFeedGames
                     new NewsPortal { Name = "TechTudo", Url = "https://www.techtudo.com.br/jogos/", IsEnabled = Preferences.Get("TechTudo", true) },
                     // new NewsPortal { Name = "Adrenaline", Url = "https://www.adrenaline.com.br/noticias/", IsEnabled = Preferences.Get("Adrenaline", true) },
                     new NewsPortal { Name = "ComboInfinito", Url = "https://www.comboinfinito.com.br/principal/", IsEnabled = Preferences.Get("ComboInfinito", true) },
-                    new NewsPortal { Name = "Arkade", Url = "https://arkade.com.br/", IsEnabled = Preferences.Get("Arkade", true) }
+                    new NewsPortal { Name = "Arkade", Url = "https://arkade.com.br/", IsEnabled = Preferences.Get("Arkade", true) },
+                    new NewsPortal { Name = "GameBlast", Url = "https://www.gameblast.com.br/", IsEnabled = Preferences.Get("GameBlast", true) }
                 };
 
                 var activePortals = enabledPortals.Where(p => p.IsEnabled).ToList();
@@ -512,6 +513,9 @@ namespace YourFeedGames
                     case "Arkade":
                         ParseArkade(htmlDoc, portal);
                         break;
+                    case "GameBlast":
+                        ParseGameBlast(htmlDoc, portal);
+                        break;
                 }
             }
             catch (TaskCanceledException)
@@ -523,6 +527,276 @@ namespace YourFeedGames
             {
                 Console.WriteLine($"Erro HTTP: {ex.Message}");
                 throw;
+            }
+        }
+
+        private void ParseGameBlast(HtmlDocument htmlDoc, NewsPortal portal)
+        {
+            try
+            {
+                Console.WriteLine("Tentando parsear GameBlast...");
+
+                // Exibir algumas informações sobre o documento HTML para diagnóstico
+                Console.WriteLine($"URL do Portal: {portal.Url}");
+                Console.WriteLine($"Título da página: {htmlDoc.DocumentNode.SelectSingleNode("//title")?.InnerText}");
+
+                // Tentativa 1: Buscar por elementos que contenham links para artigos
+                var newsNodes = htmlDoc.DocumentNode.SelectNodes("//div[contains(@class, 'post') or contains(@class, 'entry') or contains(@class, 'article')]");
+
+                // Tentativa 2: Buscar por qualquer div que contenha links com estrutura de notícias
+                if (newsNodes == null || !newsNodes.Any())
+                {
+                    newsNodes = htmlDoc.DocumentNode.SelectNodes("//div[.//a[contains(@href, '/2025/') or contains(@href, '/2024/') or contains(@href, 'gameblast.com.br')]]");
+                }
+
+                // Tentativa 3: Buscar por estruturas mais genéricas que contenham links
+                if (newsNodes == null || !newsNodes.Any())
+                {
+                    newsNodes = htmlDoc.DocumentNode.SelectNodes("//div[.//a[@href] and (.//img or .//h1 or .//h2 or .//h3)]");
+                }
+
+                if (newsNodes != null && newsNodes.Any())
+                {
+                    Console.WriteLine($"Encontrados {newsNodes.Count} nós de notícia no GameBlast");
+
+                    // Vamos examinar detalhadamente os primeiros nós
+                    var firstNode = newsNodes.FirstOrDefault();
+                    if (firstNode != null)
+                    {
+                        Console.WriteLine("Estrutura do primeiro nó:");
+                        Console.WriteLine($"HTML parcial do nó: {firstNode.OuterHtml.Substring(0, Math.Min(800, firstNode.OuterHtml.Length))}...");
+
+                        // Examinar todos os links
+                        var allLinks = firstNode.SelectNodes(".//a[@href]");
+                        Console.WriteLine($"Links encontrados no primeiro nó: {(allLinks?.Count ?? 0)}");
+                        if (allLinks != null)
+                        {
+                            foreach (var link in allLinks.Take(5))
+                            {
+                                Console.WriteLine($"Link: {link.GetAttributeValue("href", "")} - Texto: {link.InnerText.Trim()}");
+                            }
+                        }
+
+                        // Verificar headings
+                        var headings = firstNode.SelectNodes(".//*[self::h1 or self::h2 or self::h3 or self::h4]");
+                        Console.WriteLine($"Headings encontrados no primeiro nó: {(headings?.Count ?? 0)}");
+                        if (headings != null)
+                        {
+                            foreach (var heading in headings)
+                            {
+                                Console.WriteLine($"Heading: {heading.Name} - Texto: {heading.InnerText.Trim()}");
+                            }
+                        }
+
+                        // Verificar imagens
+                        var images = firstNode.SelectNodes(".//img");
+                        Console.WriteLine($"Imagens encontradas no primeiro nó: {(images?.Count ?? 0)}");
+                        if (images != null)
+                        {
+                            foreach (var img in images.Take(3))
+                            {
+                                Console.WriteLine($"Imagem: {img.GetAttributeValue("src", "")}");
+                                Console.WriteLine($"  Alt: {img.GetAttributeValue("alt", "")}");
+                                Console.WriteLine($"  Data-src: {img.GetAttributeValue("data-src", "")}");
+                                Console.WriteLine($"  Data-lazy-src: {img.GetAttributeValue("data-lazy-src", "")}");
+                            }
+                        }
+                    }
+
+                    var processedUrls = new HashSet<string>();
+                    int addedCount = 0;
+
+                    foreach (var node in newsNodes.Take(15))
+                    {
+                        try
+                        {
+                            string title = null;
+                            string url = null;
+                            string imageUrl = null;
+
+                            // Estratégia 1: Buscar link principal do artigo (GameBlast específico)
+                            var mainLink = node.SelectSingleNode(".//a[contains(@href, 'gameblast.com.br/2') or contains(@href, '/2025/') or contains(@href, '/2024/')]");
+
+                            if (mainLink != null)
+                            {
+                                url = mainLink.GetAttributeValue("href", "");
+
+                                // Tentar extrair o título do próprio link
+                                var linkText = mainLink.InnerText.Trim();
+                                if (!string.IsNullOrEmpty(linkText) && linkText.Length > 10 && linkText.Length < 200)
+                                {
+                                    title = linkText;
+                                    Console.WriteLine($"Título encontrado no link principal: {title}");
+                                }
+                            }
+
+                            // Estratégia 2: Buscar título em headings próximos ao link
+                            if (string.IsNullOrEmpty(title))
+                            {
+                                var headingWithLink = node.SelectSingleNode(".//*[self::h1 or self::h2 or self::h3 or self::h4]//a");
+                                if (headingWithLink != null)
+                                {
+                                    title = headingWithLink.InnerText.Trim();
+                                    if (string.IsNullOrEmpty(url))
+                                    {
+                                        url = headingWithLink.GetAttributeValue("href", "");
+                                    }
+                                    Console.WriteLine($"Título encontrado em heading: {title}");
+                                }
+                            }
+
+                            // Estratégia 3: Buscar por heading sem link, mas próximo a um link
+                            if (string.IsNullOrEmpty(title))
+                            {
+                                var heading = node.SelectSingleNode(".//*[self::h1 or self::h2 or self::h3 or self::h4]");
+                                if (heading != null)
+                                {
+                                    var headingText = heading.InnerText.Trim();
+                                    if (!string.IsNullOrEmpty(headingText) && headingText.Length > 10 && headingText.Length < 200)
+                                    {
+                                        title = headingText;
+                                        Console.WriteLine($"Título encontrado em heading isolado: {title}");
+                                    }
+                                }
+                            }
+
+                            // Estratégia 4: Buscar em texto âncora de qualquer link relevante
+                            if (string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(url))
+                            {
+                                var linkForUrl = node.SelectSingleNode($".//a[@href='{url}']");
+                                if (linkForUrl != null)
+                                {
+                                    var anchorText = linkForUrl.InnerText.Trim();
+                                    if (!string.IsNullOrEmpty(anchorText) && anchorText.Length > 15)
+                                    {
+                                        title = anchorText;
+                                        Console.WriteLine($"Título encontrado em âncora: {title}");
+                                    }
+                                }
+                            }
+
+                            // Estratégias para encontrar imagem
+
+                            // Estratégia 1: Imagem dentro do nó atual
+                            var imgNode = node.SelectSingleNode(".//img");
+                            if (imgNode != null)
+                            {
+                                // Verificar múltiplos atributos para lazy loading
+                                imageUrl = imgNode.GetAttributeValue("src", "");
+
+                                // Se for placeholder ou vazio, tentar data-src
+                                if (string.IsNullOrEmpty(imageUrl) || imageUrl.Contains("placeholder") || imageUrl.Contains("blank") || imageUrl.Contains("loading"))
+                                {
+                                    imageUrl = imgNode.GetAttributeValue("data-src", "");
+                                }
+
+                                // Tentar data-lazy-src
+                                if (string.IsNullOrEmpty(imageUrl) || imageUrl.Contains("placeholder") || imageUrl.Contains("blank") || imageUrl.Contains("loading"))
+                                {
+                                    imageUrl = imgNode.GetAttributeValue("data-lazy-src", "");
+                                }
+
+                                // Tentar data-original
+                                if (string.IsNullOrEmpty(imageUrl) || imageUrl.Contains("placeholder") || imageUrl.Contains("blank") || imageUrl.Contains("loading"))
+                                {
+                                    imageUrl = imgNode.GetAttributeValue("data-original", "");
+                                }
+
+                                Console.WriteLine($"Imagem encontrada: {imageUrl}");
+                            }
+
+                            // Estratégia 2: Buscar por elemento com background-image
+                            if (string.IsNullOrEmpty(imageUrl))
+                            {
+                                var elemWithBg = node.SelectSingleNode(".//*[@style[contains(., 'background-image')]]");
+                                if (elemWithBg != null)
+                                {
+                                    var style = elemWithBg.GetAttributeValue("style", "");
+                                    var match = Regex.Match(style, @"background-image:\s*url\(['""]?(.*?)['""]?\)", RegexOptions.IgnoreCase);
+                                    if (match.Success)
+                                    {
+                                        imageUrl = match.Groups[1].Value;
+                                        Console.WriteLine($"Imagem encontrada em background: {imageUrl}");
+                                    }
+                                }
+                            }
+
+                            // Garantir que as URLs sejam absolutas
+                            if (!string.IsNullOrEmpty(url) && !url.StartsWith("http"))
+                            {
+                                url = new Uri(new Uri(portal.Url), url).ToString();
+                                Console.WriteLine($"URL convertida para absoluta: {url}");
+                            }
+
+                            if (!string.IsNullOrEmpty(imageUrl) && !imageUrl.StartsWith("http"))
+                            {
+                                imageUrl = new Uri(new Uri(portal.Url), imageUrl).ToString();
+                                Console.WriteLine($"URL de imagem convertida para absoluta: {imageUrl}");
+                            }
+
+                            // Filtros de qualidade para GameBlast
+                            bool isValidNews = !string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(url) &&
+                                              title.Length > 10 && title.Length < 300 &&
+                                              !title.ToLower().Contains("leia mais") &&
+                                              !title.ToLower().Contains("comentários") &&
+                                              !title.ToLower().Contains("tags:") &&
+                                              url.Contains("gameblast.com.br") &&
+                                              !processedUrls.Contains(url);
+
+                            if (isValidNews)
+                            {
+                                NewsFeed.Add(new NewsItem
+                                {
+                                    Title = title,
+                                    Url = url,
+                                    Source = portal.Name,
+                                    ImageUrl = imageUrl
+                                });
+                                processedUrls.Add(url);
+                                addedCount++;
+                                Console.WriteLine($"Notícia do GameBlast adicionada: {title}");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Notícia não adicionada: " +
+                                    (string.IsNullOrEmpty(title) ? "Título vazio " : "") +
+                                    (string.IsNullOrEmpty(url) ? "URL vazia " : "") +
+                                    (processedUrls.Contains(url) ? "URL duplicada " : "") +
+                                    (!url.Contains("gameblast.com.br") ? "URL não é do GameBlast " : "") +
+                                    (title?.Length <= 10 ? "Título muito curto " : "") +
+                                    (title?.Length >= 300 ? "Título muito longo " : ""));
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Erro ao processar nó individual do GameBlast: {ex.Message}");
+                        }
+                    }
+
+                    Console.WriteLine($"Total de notícias do GameBlast adicionadas ao feed: {addedCount}");
+                }
+                else
+                {
+                    Console.WriteLine("Nenhuma notícia encontrada no GameBlast");
+
+                    // Debug: Listar alguns links encontrados na página
+                    var allLinks = htmlDoc.DocumentNode.SelectNodes("//a[@href]");
+                    Console.WriteLine($"Total de links encontrados na página: {(allLinks?.Count ?? 0)}");
+
+                    if (allLinks != null)
+                    {
+                        Console.WriteLine("Primeiros 10 links encontrados:");
+                        foreach (var link in allLinks.Take(10))
+                        {
+                            Console.WriteLine($"  {link.GetAttributeValue("href", "")} - {link.InnerText.Trim()}");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao parsear GameBlast: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
             }
         }
 

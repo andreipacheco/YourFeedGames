@@ -24,7 +24,8 @@ namespace YourFeedGames
                 new NewsPortal { Name = "TechTudo", Url = "https://www.techtudo.com.br/jogos/", IsEnabled = Preferences.Get("TechTudo", true) },
                 // new NewsPortal { Name = "Adrenaline", Url = "https://www.adrenaline.com.br/noticias/", IsEnabled = Preferences.Get("Adrenaline", true) },
                 new NewsPortal { Name = "ComboInfinito", Url = "https://www.comboinfinito.com.br/principal/", IsEnabled = Preferences.Get("ComboInfinito", true) },
-                new NewsPortal { Name = "Arkade", Url = "https://arkade.com.br/", IsEnabled = Preferences.Get("Arkade", true) }
+                new NewsPortal { Name = "Arkade", Url = "https://arkade.com.br/", IsEnabled = Preferences.Get("Arkade", true) },
+                new NewsPortal { Name = "GameBlast", Url = "https://www.gameblast.com.br/", IsEnabled = Preferences.Get("GameBlast", true) }
             };
 
             SaveCommand = new Command(SaveSettings);
