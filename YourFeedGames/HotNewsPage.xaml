@@ -33,7 +33,7 @@
                     TextColor="White"
                     Clicked="OnRockstarLinkClicked" />
 
-            <!-- Notícia 2: Mafia Old Country -->
+            <!-- Notícia 2: Mafia Old Country 
             <Label Text="Mafia: Old Country - Um Novo Capítulo!"
                    FontSize="24"
                    FontAttributes="Bold"
@@ -44,7 +44,7 @@
             <Button Text="Saiba mais no site da 2K"
                     BackgroundColor="#e74c3c"
                     TextColor="White"
-                    Clicked="On2KLinkClicked" />
+                    Clicked="On2KLinkClicked" /> -->
         </StackLayout>
     </ScrollView>
 </ContentPage>

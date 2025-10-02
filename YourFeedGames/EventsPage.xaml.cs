@@ -21,28 +21,28 @@ public partial class EventsPage : ContentPage
         _playerId = GetCurrentPlayerId();
     }
 
-    private async void OnTgsNotifyClicked(object sender, EventArgs e)
-    {
-        if (!_tgsNotificationsActive)
-        {
-            // Ativar notificações
-            bool success = await AgendarNotificacaoTgs();
-            if (success)
-            {
-                _tgsNotificationsActive = true;
-                TgsNotifyButton.Text = "🔕 Desativar Notificações";
-                TgsNotifyButton.BackgroundColor = Colors.Gray;
-            }
-        }
-        else
-        {
-            // Desativar notificações
-            await CancelarNotificacoes("Tokyo Game Show 2025");
-            _tgsNotificationsActive = false;
-            TgsNotifyButton.Text = "🔔 Ativar Notificações";
-            TgsNotifyButton.BackgroundColor = (Color)Application.Current.Resources["Primary"];
-        }
-    }
+    //private async void OnTgsNotifyClicked(object sender, EventArgs e)
+    //{
+    //    if (!_tgsNotificationsActive)
+    //    {
+    //        // Ativar notificações
+    //        bool success = await AgendarNotificacaoTgs();
+    //        if (success)
+    //        {
+    //            _tgsNotificationsActive = true;
+    //            TgsNotifyButton.Text = "🔕 Desativar Notificações";
+    //            TgsNotifyButton.BackgroundColor = Colors.Gray;
+    //        }
+    //    }
+    //    else
+    //    {
+    //        // Desativar notificações
+    //        await CancelarNotificacoes("Tokyo Game Show 2025");
+    //        _tgsNotificationsActive = false;
+    //        TgsNotifyButton.Text = "🔔 Ativar Notificações";
+    //        TgsNotifyButton.BackgroundColor = (Color)Application.Current.Resources["Primary"];
+    //    }
+    //}
 
     private async void OnTgaNotifyClicked(object sender, EventArgs e)
     {
