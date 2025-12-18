@@ -4,78 +4,97 @@
              x:Class="YourFeedGames.SummaryPage"
              Title="2 minutos de leitura">
 
-    <ScrollView>
-        <StackLayout Padding="20" Spacing="15">
 
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24,36,24,24" Spacing="24">
             <!-- Loading State -->
-            <StackLayout x:Name="loadingStack" IsVisible="True" 
-                        HorizontalOptions="Center" VerticalOptions="Center" 
-                        Spacing="10" Padding="50">
-                <ActivityIndicator x:Name="loadingIndicator" 
-                                 IsRunning="True" 
-                                 IsVisible="True"
-                                 Color="{AppThemeBinding Light=Blue, Dark=LightBlue}"
-                                 WidthRequest="50" 
-                                 HeightRequest="50" />
-                <Label Text="Gerando resumo com IA..." 
-                       FontSize="16" 
-                       HorizontalOptions="Center" 
-                       TextColor="{AppThemeBinding Light=Gray, Dark=LightGray}" />
-                <Label x:Name="progressLabel" 
-                       Text="Processando notícias..." 
-                       FontSize="14" 
-                       HorizontalOptions="Center" 
-                       TextColor="{AppThemeBinding Light=Gray, Dark=LightGray}" />
-            </StackLayout>
+            <Grid x:Name="loadingStack" IsVisible="True" RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*" Padding="0,60,0,0">
+                <Frame HasShadow="True" CornerRadius="18" Padding="32,32,32,32" BackgroundColor="#f1f5f9" HorizontalOptions="Center" VerticalOptions="Center">
+                    <VerticalStackLayout Spacing="18" HorizontalOptions="Center">
+                        <ActivityIndicator x:Name="loadingIndicator"
+                                          IsRunning="True"
+                                          IsVisible="True"
+                                          Color="#2563eb"
+                                          WidthRequest="56"
+                                          HeightRequest="56" />
+                        <Label Text="Gerando resumo com IA..."
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               HorizontalOptions="Center"
+                               TextColor="#64748b" />
+                        <Label x:Name="progressLabel"
+                               Text="Processando notícias..."
+                               FontSize="15"
+                               HorizontalOptions="Center"
+                               TextColor="#94a3b8" />
+                    </VerticalStackLayout>
+                </Frame>
+            </Grid>
 
             <!-- Content State -->
-            <StackLayout x:Name="contentStack" IsVisible="False" Spacing="15">
-                <Label Text="📋 Resumo das Principais Notícias" 
-                       FontSize="22" 
-                       FontAttributes="Bold" 
-                       HorizontalOptions="Center" 
-                       Margin="0,0,0,10" />
+            <Grid x:Name="contentStack" IsVisible="False">
+                <VerticalStackLayout Spacing="18">
+                    <Label Text="📰 2 minutos de leitura"
+                           FontSize="26"
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center"
+                           TextColor="#94a3b8"
+                           Margin="0,0,0,8" />
 
-                <Frame BackgroundColor="{AppThemeBinding Light=LightGray, Dark=DarkGray}" 
-                       Padding="15" 
-                       CornerRadius="10">
-                    <ScrollView>
-                        <Label x:Name="summaryLabel" 
-                               FontSize="16" 
-                               LineBreakMode="WordWrap" 
-                               TextColor="{AppThemeBinding Light=Black, Dark=White}" />
-                    </ScrollView>
-                </Frame>
+                    <Frame BackgroundColor="#f1f5f9"
+                           Padding="20"
+                           CornerRadius="18"
+                           HasShadow="True"
+                           BorderColor="#cbd5e1">
+                        <ScrollView>
+                            <Label x:Name="summaryLabel"
+                                   FontSize="24"
+                                   LineBreakMode="WordWrap"
+                                   TextColor="#0f172a"
+                                   FontFamily="Arial"
+                                   Margin="0,0,0,0" />
+                        </ScrollView>
+                    </Frame>
 
-                <Button x:Name="regenerateButton" 
-                        Text="🔄 Gerar Novo Resumo" 
-                        BackgroundColor="{AppThemeBinding Light=Blue, Dark=DarkBlue}"
-                        TextColor="White"
-                        Clicked="OnRegenerateClicked" 
-                        Margin="0,10,0,0" />
-            </StackLayout>
+                    <Button x:Name="regenerateButton"
+                            Text="🔄 Gerar Novo Resumo"
+                            BackgroundColor="#2563eb"
+                            TextColor="White"
+                            FontAttributes="Bold"
+                            CornerRadius="12"
+                            Padding="0,12"
+                            FontSize="17"
+                            Clicked="OnRegenerateClicked"
+                            Margin="0,10,0,0" />
+                </VerticalStackLayout>
+            </Grid>
 
             <!-- Error State -->
-            <StackLayout x:Name="errorStack" IsVisible="False" 
-                        HorizontalOptions="Center" 
-                        Spacing="15" 
-                        Padding="20">
-                <Label Text="❌" FontSize="50" HorizontalOptions="Center" />
-                <Label Text="Erro ao gerar resumo" 
-                       FontSize="18" 
-                       FontAttributes="Bold" 
-                       HorizontalOptions="Center" />
-                <Label x:Name="errorLabel" 
-                       FontSize="14" 
-                       HorizontalOptions="Center" 
-                       TextColor="Red"
-                       LineBreakMode="WordWrap" />
-                <Button Text="🔄 Tentar Novamente" 
-                        BackgroundColor="Orange"
-                        TextColor="White"
-                        Clicked="OnRetryClicked" />
-            </StackLayout>
-
-        </StackLayout>
+            <Grid x:Name="errorStack" IsVisible="False" Padding="0,40,0,0">
+                <Frame HasShadow="True" CornerRadius="18" Padding="28,24" BackgroundColor="#fef2f2" BorderColor="#f87171" HorizontalOptions="Center">
+                    <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
+                        <Label Text="❌" FontSize="54" HorizontalOptions="Center" />
+                        <Label Text="Erro ao gerar resumo"
+                               FontSize="20"
+                               FontAttributes="Bold"
+                               HorizontalOptions="Center"
+                               TextColor="#b91c1c" />
+                        <Label x:Name="errorLabel"
+                               FontSize="15"
+                               HorizontalOptions="Center"
+                               TextColor="#b91c1c"
+                               LineBreakMode="WordWrap" />
+                        <Button Text="🔄 Tentar Novamente"
+                                BackgroundColor="#f87171"
+                                TextColor="White"
+                                FontAttributes="Bold"
+                                CornerRadius="10"
+                                Padding="0,10"
+                                Clicked="OnRetryClicked" />
+                    </VerticalStackLayout>
+                </Frame>
+            </Grid>
+        </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
