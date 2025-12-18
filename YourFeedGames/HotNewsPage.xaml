@@ -33,18 +33,19 @@
                     TextColor="White"
                     Clicked="OnRockstarLinkClicked" />
 
-            <!-- Notícia 2: Mafia Old Country 
-            <Label Text="Mafia: Old Country - Um Novo Capítulo!"
+            <!-- Notícia 3: Steam Novidades -->
+            <Label Text="Steam: Novidades e Atualizações Quentes!"
                    FontSize="24"
                    FontAttributes="Bold"
                    HorizontalOptions="Center" />
-            <Label Text="A 2K Games revelou o lançamento de Mafia: Old Country, um novo capítulo emocionante na icônica série Mafia. Prepare-se para uma jornada épica no submundo do crime!"
+            <Label Text="A Steam acaba de lançar uma série de novidades e atualizações para a plataforma! Fique por dentro dos lançamentos, eventos e melhorias diretamente do portal oficial da Steam."
                    FontSize="16"
                    LineBreakMode="WordWrap" />
-            <Button Text="Saiba mais no site da 2K"
-                    BackgroundColor="#e74c3c"
+            <Button Text="Confira as novidades na Steam"
+                    BackgroundColor="#171a21"
                     TextColor="White"
-                    Clicked="On2KLinkClicked" /> -->
+                    Clicked="OnSteamLinkClicked" />
+
         </StackLayout>
     </ScrollView>
 </ContentPage>

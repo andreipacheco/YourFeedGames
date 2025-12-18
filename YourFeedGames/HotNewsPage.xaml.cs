@@ -26,5 +26,11 @@ namespace YourFeedGames
             var url = "https://mafia.2k.com/the-old-country/";
             await Launcher.OpenAsync(new Uri(url));
         }
+
+        private async void OnSteamLinkClicked(object sender, EventArgs e)
+        {
+            var url = "https://store.steampowered.com/news/collection/steam/?emclan=103582791475000432&emgid=578276333072679812";
+            await Launcher.OpenAsync(new Uri(url));
+        }
     }
 }
