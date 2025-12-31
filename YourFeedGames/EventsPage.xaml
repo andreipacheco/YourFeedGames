@@ -3,45 +3,47 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="YourFeedGames.EventsPage"
              Title="Eventos de Games">
-	<ScrollView>
-		<VerticalStackLayout Padding="16" Spacing="16">
-			<!-- Tokyo Game Show (TGS)
-			<Frame HasShadow="True" CornerRadius="12" Padding="14">
-				<VerticalStackLayout Spacing="12">
-					<Label Text="Tokyo Game Show (TGS)"
-                           FontAttributes="Bold"
-                           FontSize="18" />
-					<Label Text="25–28 de setembro • Chiba (Japão). Participação de gigantes como Microsoft/Xbox."
-                           FontSize="14"
-                           TextColor="{DynamicResource SecondaryTextColor}" />
-					<Button x:Name="TgsNotifyButton"
-                            Text="🔔 Ativar Notificações"
-                            BackgroundColor="{DynamicResource Primary}"
-                            TextColor="White"
-                            CornerRadius="8"
-                            HeightRequest="44"
-                            Clicked="OnTgsNotifyClicked" />
-				</VerticalStackLayout>
-			</Frame> -->
-
-			<!-- The Game Awards 2025 -->
-			<Frame HasShadow="True" CornerRadius="12" Padding="14">
-				<VerticalStackLayout Spacing="12">
-					<Label Text="The Game Awards 2025"
-                           FontAttributes="Bold"
-                           FontSize="18" />
-					<Label Text="11 de dezembro • Peacock Theater, Los Angeles. Celebra os principais títulos do ano."
-                           FontSize="14"
-                           TextColor="{DynamicResource SecondaryTextColor}" />
-					<Button x:Name="TgaNotifyButton"
-                            Text="🔔 Ativar Notificações"
-                            BackgroundColor="{DynamicResource Primary}"
-                            TextColor="White"
-                            CornerRadius="8"
-                            HeightRequest="44"
-                            Clicked="OnTgaNotifyClicked" />
-				</VerticalStackLayout>
-			</Frame>
-		</VerticalStackLayout>
-	</ScrollView>
+    <ContentPage.Content>
+        <Grid RowDefinitions="Auto,*">
+            <Label Text="Próximos Eventos"
+                   FontAttributes="Bold"
+                   FontSize="22"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Start"
+                   Padding="16"
+                   Grid.Row="0" />
+            <CollectionView x:Name="EventosCollectionView"
+                            ItemsSource="{Binding EventosFuturos}"
+                            EmptyView="Nenhum evento futuro encontrado."
+                            SelectionMode="None"
+                            Grid.Row="1"
+                            Margin="16,0,16,24">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame HasShadow="True" CornerRadius="12" Padding="14" Margin="0,0,0,10" BackgroundColor="{DynamicResource CardBackgroundColor}">
+                            <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                                <VerticalStackLayout Spacing="8" Grid.Column="0">
+                                    <Label Text="{Binding titulo}" FontAttributes="Bold" FontSize="18" />
+                                    <Label Text="{Binding descricao}" FontSize="14" TextColor="{DynamicResource SecondaryTextColor}" />
+                                    <Label Text="{Binding data, StringFormat='Data: {0:dd/MM/yyyy HH:mm}'}" FontSize="13" />
+                                    <Label Text="{Binding local, StringFormat='Local: {0}'}" FontSize="13" />
+                                </VerticalStackLayout>
+                                <Button Grid.Column="1"
+                                        Text="📖"
+                                        CommandParameter="{Binding imagem_url}"
+                                        Clicked="OnReadMoreClicked"
+                                        BackgroundColor="Transparent"
+                                        TextColor="{AppThemeBinding Light=#007AFF, Dark=#0A84FF}"
+                                        FontSize="16"
+                                        WidthRequest="32"
+                                        HeightRequest="32"
+                                        CornerRadius="16"
+                                        Padding="0" />
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+    </ContentPage.Content>
 </ContentPage>
