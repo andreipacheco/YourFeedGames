@@ -8,15 +8,19 @@ Your Feed Games é um aplicativo multiplataforma desenvolvido com .NET MAUI 9.0 
 - XAML para UI
 - Lotties Files
 - OneSignal (Notifications)
+- Supabase
+- Gemini API (AI Features)
 
 ✨ Funcionalidades Principais
 - Feed de Notícias Personalizável: Escolha de quais portais deseja receber as notícias.
 - Atualização Rápida: Botão de recarregar para buscar as últimas notícias em tempo real.
 - Hot News: Acesse as notícias mais quentes e populares do momento no mundo gamer.
-- Multiplataforma: Funciona em iOS, Android, Windows e macOS.
+- 2 Minutos de Leitura: Resumos rápidos para você se manter informado sem perder tempo.
+- Eventos: Acompanhe os principais eventos do mundo dos games.
 - Configurações Flexíveis: Controle quais fontes de notícias deseja acompanhar.
+- Multiplataforma: Funciona em iOS, Android, Windows e macOS.
 
-🎮 Portais Suportados (Exemplos)
+🎮 Portais Consultados
 - Flow Games
 - IGN Brasil
 - GameVicio
@@ -24,7 +28,7 @@ Your Feed Games é um aplicativo multiplataforma desenvolvido com .NET MAUI 9.0 
 - The Enemy
 - Voxel
 - GamePlaysCassi
-- Adrenaline
+- GameBlast
 - Arkade
 - Combo Infinito
 
@@ -40,6 +44,12 @@ Toque no botão de atualização 🔄 na barra de ferramentas
 
 🔥 Hot News
 Toque no botão de "Hot News" para ver as notícias mais populares e quentes do momento, classificadas por relevância no mundo gamer.
+
+⏱️ 2️ Minutos de Leitura
+Toque no ícone de "2 Minutos de Leitura" para acessar resumos rápidos das notícias mais importantes, permitindo que você se mantenha informado em pouco tempo.
+
+🎮 Eventos 
+Toque no ícone de "Eventos" para acompanhar os principais eventos do mundo dos games, incluindo lançamentos, conferências e muito mais.
 
 
 📸 Screenshots
