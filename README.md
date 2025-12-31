@@ -54,9 +54,10 @@ Toque no ícone de "Eventos" para acompanhar os principais eventos do mundo dos 
 
 📸 Screenshots
 <p align="center">
-  <img src="./Screenshot_1747060525.png" width="200" alt="App">
-  <img src="./Screenshot_1747060531.png" width="200" alt="App">
-  <img src="./Screenshot_1747060538.png" width="200" alt="App">
+  <img src="./Screenshot_1767191388.png" width="200" alt="App">
+  <img src="./Screenshot_1767191423.png" width="200" alt="App">
+  <img src="./Screenshot_1767191434.png" width="200" alt="App">
+  <img src="./Screenshot_1767191446.png" width="200" alt="App">
 </p>
 
 
