@@ -3,49 +3,18 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="YourFeedGames.HotNewsPage"
              Title="Hot News">
-    <ScrollView>
-        <StackLayout Padding="10" Spacing="20">
-            <!-- Notícia 1: Nintendo Switch 2 -->
-            <Label Text="Nintendo Switch 2: Finalmente Revelado!"
-                   FontSize="24"
-                   FontAttributes="Bold"
-                   HorizontalOptions="Center" />
-            <Label Text="A Nintendo oficialmente revelou o Nintendo Switch 2! O novo console promete gráficos aprimorados, maior capacidade de armazenamento e retrocompatibilidade com jogos do Switch original. A revolução dos portáteis continua!"
-                   FontSize="16"
-                   LineBreakMode="WordWrap" />
-            <Button Text="Confira no site da Nintendo"
-                    BackgroundColor="#e60012"
-                    TextColor="White"
-                    Clicked="OnNintendoLinkClicked" />
-
-            <!-- Título da notícia -->
-            <Label Text="GTA VI: Data de Lançamento Confirmada!"
-                   FontSize="24"
-                   FontAttributes="Bold"
-                   HorizontalOptions="Center" />
-            <!-- Descrição da notícia -->
-            <Label Text="A Rockstar Games anunciou oficialmente a data de lançamento do tão aguardado GTA VI. Prepare-se para explorar um mundo ainda mais imersivo e cheio de aventuras!"
-                   FontSize="16"
-                   LineBreakMode="WordWrap" />
-            <!-- Link para o portal da Rockstar -->
-            <Button Text="Saiba mais no site da Rockstar"
-                    BackgroundColor="#3498db"
-                    TextColor="White"
-                    Clicked="OnRockstarLinkClicked" />
-
-            <!-- Notícia 3: Steam Novidades -->
-            <Label Text="Steam: Novidades e Atualizações Quentes!"
-                   FontSize="24"
-                   FontAttributes="Bold"
-                   HorizontalOptions="Center" />
-            <Label Text="A Steam acaba de lançar uma série de novidades e atualizações para a plataforma! Fique por dentro dos lançamentos, eventos e melhorias diretamente do portal oficial da Steam."
-                   FontSize="16"
-                   LineBreakMode="WordWrap" />
-            <Button Text="Confira as novidades na Steam"
-                    BackgroundColor="#171a21"
-                    TextColor="White"
-                    Clicked="OnSteamLinkClicked" />
-
-        </StackLayout>
-    </ScrollView>
+    <ContentPage.Content>
+        <CollectionView x:Name="HotNewsCollectionView"
+                        ItemsSource="{Binding HotNewsAtivas}"
+                        EmptyView="Nenhuma notícia quente encontrada."
+                        Margin="16,16,16,16">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame HasShadow="True" CornerRadius="12" Padding="14" Margin="0,0,0,14" BackgroundColor="{DynamicResource CardBackgroundColor}">
+                        <Label Text="{Binding descricao}" FontSize="16" LineBreakMode="WordWrap" />
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </ContentPage.Content>
 </ContentPage>

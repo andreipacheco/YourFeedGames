@@ -50,5 +50,28 @@ namespace YourFeedGames
         {
             await _client.From<Events>().Insert(evento);
         }
+
+        public async Task<List<HotNews>> GetHotNewsAtivasAsync()
+        {
+            try
+            {
+                if (_initTask != null)
+                    await _initTask;
+
+                var result = await _client.From<HotNews>()
+                    .Filter("status", Supabase.Postgrest.Constants.Operator.Equals, "true")
+                    .Get();
+
+                if (result.Models == null || result.Models.Count == 0)
+                {
+                    return new List<HotNews>();
+                }
+                return result.Models;
+            }
+            catch (Exception ex)
+            {
+                return new List<HotNews>();
+            }
+        }
     }
 }
